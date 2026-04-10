@@ -1,23 +1,21 @@
 import './style.css'
-import { answerOptions, quizQuestions, totalQuestions } from './quiz-data.js'
+import { appMeta } from './app-meta.js'
+import { answerOptions, axisSections, quizQuestions, totalQuestions } from './quiz-data.js'
 import { indexedResults } from './results.js'
-import {
-  getAnsweredCount,
-  getFinalResult,
-  getFirstUnansweredIndex,
-  isQuizComplete,
-} from './scoring.js'
+import { getAnsweredCount, getFinalResult, isQuizComplete } from './scoring.js'
 
 const app = document.querySelector('#app')
 
+const answerLabelByValue = Object.fromEntries(answerOptions.map((option) => [option.value, option.label]))
+
 const state = {
   view: 'home',
-  currentQuestionIndex: 0,
   answers: Array(totalQuestions).fill(null),
   search: '',
   previewCode: 'LOOP',
   copyState: 'idle',
   focusSearchAfterRender: false,
+  preservedQuizScrollY: null,
 }
 
 let copyResetTimer = null
@@ -59,10 +57,6 @@ function getFilteredResults() {
   )
 }
 
-function getCurrentQuestion() {
-  return quizQuestions[state.currentQuestionIndex]
-}
-
 function getRelatedResults(index) {
   const offsets = [-2, -1, 1, 2]
 
@@ -74,6 +68,24 @@ function getRelatedResults(index) {
 
 function getShareText(result) {
   return `我测出来是 ${result.code}｜${result.englishName}｜${result.name}\n一句话：${result.verdict}\n吐槽：${result.description}\n#MoodAtlas`
+}
+
+function getAxisAnsweredCount(axis) {
+  return quizQuestions.reduce((count, question, index) => {
+    if (question.axis !== axis) {
+      return count
+    }
+
+    return Number.isInteger(state.answers[index]) ? count + 1 : count
+  }, 0)
+}
+
+function getQuestionIndexById(questionId) {
+  return quizQuestions.findIndex((question) => question.id === questionId)
+}
+
+function scrollToSelector(selector) {
+  document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 function resetCopyStateSoon() {
@@ -104,77 +116,52 @@ async function copyResultText() {
 
 function startQuiz() {
   state.view = 'quiz'
-  state.currentQuestionIndex = Math.max(0, getFirstUnansweredIndex(state.answers))
   render()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 function restartQuiz() {
   state.answers = Array(totalQuestions).fill(null)
-  state.currentQuestionIndex = 0
-  state.view = 'quiz'
   state.copyState = 'idle'
+  state.view = 'quiz'
   render()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 function goHome() {
   state.view = 'home'
   render()
-}
-
-function goToQuestion(index) {
-  state.currentQuestionIndex = Math.max(0, Math.min(index, totalQuestions - 1))
-  state.view = 'quiz'
-  render()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 function showResult() {
   if (!isQuizComplete(state.answers)) {
-    const firstUnansweredIndex = getFirstUnansweredIndex(state.answers)
-    state.view = 'quiz'
-    state.currentQuestionIndex = firstUnansweredIndex === -1 ? 0 : firstUnansweredIndex
-    render()
+    jumpToFirstUnanswered()
     return
   }
 
   state.view = 'result'
   render()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-function nextQuestion() {
-  if (state.currentQuestionIndex === totalQuestions - 1) {
-    showResult()
+function jumpToFirstUnanswered() {
+  const firstUnansweredIndex = state.answers.findIndex((answer) => !Number.isInteger(answer))
+
+  if (firstUnansweredIndex === -1) {
     return
   }
 
-  state.currentQuestionIndex += 1
+  state.view = 'quiz'
   render()
+  requestAnimationFrame(() => {
+    scrollToSelector(`#question-${quizQuestions[firstUnansweredIndex].id}`)
+  })
 }
 
-function previousQuestion() {
-  if (state.currentQuestionIndex === 0) {
-    return
-  }
-
-  state.currentQuestionIndex -= 1
-  render()
-}
-
-function selectAnswer(value) {
-  state.answers[state.currentQuestionIndex] = value
-
-  if (state.currentQuestionIndex === totalQuestions - 1) {
-    if (isQuizComplete(state.answers)) {
-      state.view = 'result'
-    } else {
-      const firstUnansweredIndex = getFirstUnansweredIndex(state.answers)
-      state.currentQuestionIndex = firstUnansweredIndex === -1 ? state.currentQuestionIndex : firstUnansweredIndex
-    }
-
-    render()
-    return
-  }
-
-  state.currentQuestionIndex += 1
+function selectAnswer(questionIndex, value) {
+  state.preservedQuizScrollY = window.scrollY
+  state.answers[questionIndex] = value
   render()
 }
 
@@ -206,6 +193,23 @@ function renderResultCard(result, activeCode = '') {
   `
 }
 
+function renderScaleLegend() {
+  return `
+    <div class="scale-legend">
+      ${answerOptions
+        .map(
+          (option) => `
+            <div class="scale-legend-item">
+              <span class="scale-legend-value">${option.value}</span>
+              <span>${escapeHtml(option.label)}</span>
+            </div>
+          `,
+        )
+        .join('')}
+    </div>
+  `
+}
+
 function renderHomeScreen() {
   const preview = getPreviewResult()
   const filteredResults = getFilteredResults()
@@ -214,11 +218,10 @@ function renderHomeScreen() {
     <main class="layout">
       <section class="hero-panel" id="hero">
         <div class="hero-copy">
-          <p class="eyebrow">不是拼前缀，是 64 个独立人格结果</p>
+          <p class="eyebrow">Beta v${escapeHtml(appMeta.version)}</p>
           <h1>前台像梗图人格宇宙，后台其实是六维模型。</h1>
           <p class="lede">
-            这版已经把 48 道题、6 个隐藏维度和 64 个结果映射全部接进来了。用户做的是一个完整的
-            静态网页测试，页面不会暴露维度拼接感，但后台仍然是可维护、可调参的稳定结构。
+            这版已经把 48 道题、6 个隐藏维度和 64 个结果映射全部接进来了。现在答题页也改成了更适合手机和桌面的单页式结构，尽量少翻页、少遮挡、少打断。
           </p>
 
           <div class="stat-row">
@@ -242,7 +245,7 @@ function renderHomeScreen() {
           </div>
 
           <div class="chip-row">
-            ${['嘴硬压着', '黏连挂心', '摆烂缓冲', '控场接管', '脑补复盘', '发疯热反应']
+            ${['单页答题', '移动端优化', '中英双名', 'GitHub Pages']
               .map((item) => `<span class="result-chip">${escapeHtml(item)}</span>`)
               .join('')}
           </div>
@@ -270,28 +273,27 @@ function renderHomeScreen() {
       <section class="mechanics-panel">
         <div class="section-heading">
           <p class="eyebrow">How It Works</p>
-          <h2>最适合静态网页的一种实现</h2>
+          <h2>这版重点把答题体验做顺了</h2>
           <p class="section-copy">
-            每题都走 1 到 5 分的量表，后台按正反向累计到隐藏维度，再把 6 位二进制索引映射成 64 个最终结果。
-            用户看到的是顺滑的测试体验，开发端拿到的是一套很稳定的结构。
+            现在答题页改成分区长卷，手机端不用一题一翻，桌面端也能更快扫完整体进度。后台计分逻辑保持不变，仍然是 6 维隐藏轴映射到 64 个结果。
           </p>
         </div>
 
         <div class="mechanics-grid">
           <article class="mechanic-card">
             <span class="mechanic-step">01</span>
-            <h3>48 题量表作答</h3>
-            <p>每题统一 1 到 5 分，从“你别乱说”到“像到离谱”。</p>
+            <h3>单页答题</h3>
+            <p>按 6 个维度分组展示，一次看完一整段，尽量少翻页。</p>
           </article>
           <article class="mechanic-card">
             <span class="mechanic-step">02</span>
-            <h3>6 维隐藏计分</h3>
-            <p>每个维度 8 题，正反向题自动换算，24 分时用该轴最后一题裁决。</p>
+            <h3>更稳的移动端布局</h3>
+            <p>缩小遮挡风险，去掉容易挡内容的结构，按钮区也更紧凑。</p>
           </article>
           <article class="mechanic-card">
             <span class="mechanic-step">03</span>
-            <h3>映射到独立结果</h3>
-            <p>最终只展示独立人格结果，不把后台的拼接结构直接暴露给用户。</p>
+            <h3>版本化 beta</h3>
+            <p>这版开始按 beta 版本维护，每次更新同步改版本号和 README。</p>
           </article>
         </div>
       </section>
@@ -301,18 +303,18 @@ function renderHomeScreen() {
           <p class="eyebrow">Result Library</p>
           <h2>64 种人格结果可以直接预览</h2>
           <p class="section-copy">
-            点击任意卡片会切换上方预览。等你后面还想继续补“优点 / 痛点 / 高频弹幕”，这里的数据层也已经够用了。
+            点击任意卡片会切换上方预览。搜索现在也支持新代号、英文名、中文名和结果文案关键词。
           </p>
         </div>
 
         <div class="library-toolbar">
           <label class="search-box" for="result-search">
-            <span>搜索代号、名称或关键词</span>
+            <span>搜索代号、英文、中文或关键词</span>
             <input
               id="result-search"
               type="search"
               value="${escapeHtml(state.search)}"
-              placeholder="比如：复盘、哈哈、冰壳、上头"
+              placeholder="比如：LEDGR、Why Machine、回春人、复盘"
               autocomplete="off"
             />
           </label>
@@ -334,113 +336,137 @@ function renderHomeScreen() {
   `
 }
 
-function renderQuestionPalette() {
-  return quizQuestions
-    .map((question, index) => {
-      const answer = state.answers[index]
-      const answered = Number.isInteger(answer)
-      const current = index === state.currentQuestionIndex
+function renderQuestionCard(question) {
+  const questionIndex = getQuestionIndexById(question.id)
+  const currentAnswer = state.answers[questionIndex]
 
-      return `
-        <button
-          class="question-dot${answered ? ' is-answered' : ''}${current ? ' is-current' : ''}"
-          type="button"
-          data-go-question="${index}"
-          aria-label="第 ${question.id} 题"
-        >
-          ${String(question.id).padStart(2, '0')}
-        </button>
-      `
-    })
-    .join('')
+  return `
+    <article class="question-card${Number.isInteger(currentAnswer) ? ' is-answered' : ''}" id="question-${question.id}">
+      <div class="question-card-top">
+        <span class="question-number">Q${String(question.id).padStart(2, '0')}</span>
+        <span class="question-state">${Number.isInteger(currentAnswer) ? escapeHtml(answerLabelByValue[currentAnswer]) : '未作答'}</span>
+      </div>
+      <p class="question-text">${escapeHtml(question.text)}</p>
+      <div class="answer-button-row" role="radiogroup" aria-label="第 ${question.id} 题">
+        ${answerOptions
+          .map(
+            (option) => `
+              <button
+                class="answer-button${currentAnswer === option.value ? ' is-active' : ''}"
+                type="button"
+                data-answer-question="${questionIndex}"
+                data-answer-value="${option.value}"
+                aria-pressed="${currentAnswer === option.value ? 'true' : 'false'}"
+                title="${escapeHtml(option.label)}"
+                aria-label="第 ${question.id} 题，${escapeHtml(option.label)}"
+              >
+                ${option.value}
+              </button>
+            `,
+          )
+          .join('')}
+      </div>
+    </article>
+  `
+}
+
+function renderAxisSection(section) {
+  const answered = getAxisAnsweredCount(section.axis)
+
+  return `
+    <section class="axis-section" id="axis-${section.axis}">
+      <div class="axis-section-head">
+        <div>
+          <p class="eyebrow">${section.axis} Axis</p>
+          <h2>${escapeHtml(section.title)}</h2>
+          <p class="section-copy">从 ${escapeHtml(section.lowLabel)} 到 ${escapeHtml(section.highLabel)}，共 ${section.questions.length} 题。</p>
+        </div>
+        <div class="axis-tags">
+          <span class="axis-tag">${escapeHtml(section.lowLabel)}</span>
+          <span class="axis-tag">${escapeHtml(section.highLabel)}</span>
+          <span class="axis-tag axis-tag-count">${answered}/${section.questions.length} 已答</span>
+        </div>
+      </div>
+
+      ${renderScaleLegend()}
+
+      <div class="question-card-grid">
+        ${section.questions.map((question) => renderQuestionCard(question)).join('')}
+      </div>
+    </section>
+  `
 }
 
 function renderQuizScreen() {
-  const currentQuestion = getCurrentQuestion()
   const answeredCount = getAnsweredCount(state.answers)
   const progress = Math.round((answeredCount / totalQuestions) * 100)
-  const currentAnswer = state.answers[state.currentQuestionIndex]
 
   return `
     <main class="layout quiz-layout">
       <section class="quiz-main">
-        <article class="quiz-card">
+        <article class="quiz-intro-card">
           <div class="progress-header">
             <div>
-              <p class="eyebrow">Question ${String(currentQuestion.id).padStart(2, '0')} / ${totalQuestions}</p>
-              <h1 class="question-title">${escapeHtml(currentQuestion.text)}</h1>
+              <p class="eyebrow">Beta Quiz Flow</p>
+              <h1 class="question-title">这版改成整页答题，尽量少翻页。</h1>
             </div>
             <div class="progress-stack">
               <div class="progress-track" aria-hidden="true">
                 <span class="progress-fill" style="width:${progress}%"></span>
               </div>
-              <p class="progress-copy">已作答 ${answeredCount} 题，还剩 ${totalQuestions - answeredCount} 题。</p>
+              <p class="progress-copy">已作答 ${answeredCount} / ${totalQuestions} 题。做完就能直接算结果。</p>
             </div>
           </div>
+        </article>
 
-          <div class="choice-scale">
-            <span>1 = 你别乱说</span>
-            <span>5 = 像到离谱</span>
+        <div class="axis-section-stack">
+          ${axisSections.map((section) => renderAxisSection(section)).join('')}
+        </div>
+      </section>
+
+      <aside class="quiz-sidebar">
+        <article class="palette-card quiz-summary-card">
+          <p class="mini-label">${escapeHtml(appMeta.stage)} / v${escapeHtml(appMeta.version)}</p>
+          <h2 class="sidebar-title">进度一眼看完</h2>
+          <p class="section-copy">桌面端右侧固定，手机端会折回顶部，不再挡住内容。</p>
+
+          <div class="sidebar-progress">
+            <strong>${progress}%</strong>
+            <span>${answeredCount}/${totalQuestions} 已答</span>
           </div>
 
-          <div class="option-grid">
-            ${answerOptions
+          <div class="axis-summary-list">
+            ${axisSections
               .map(
-                (option) => `
-                  <button
-                    class="option-card${currentAnswer === option.value ? ' is-active' : ''}"
-                    type="button"
-                    data-answer-value="${option.value}"
-                  >
-                    <span class="option-value">${option.value}</span>
-                    <span class="option-copy">${escapeHtml(option.label)}</span>
+                (section) => `
+                  <button class="axis-summary-button" type="button" data-jump-axis="${section.axis}">
+                    <span>${section.axis} · ${escapeHtml(section.title)}</span>
+                    <strong>${getAxisAnsweredCount(section.axis)}/${section.questions.length}</strong>
                   </button>
                 `,
               )
               .join('')}
           </div>
 
-          <div class="quiz-controls">
-            <button
-              class="secondary-btn"
-              type="button"
-              id="previous-question"
-              ${state.currentQuestionIndex === 0 ? 'disabled' : ''}
-            >
-              上一题
+          <div class="sidebar-actions">
+            <button class="primary-btn" id="submit-quiz" type="button" ${!isQuizComplete(state.answers) ? 'disabled' : ''}>
+              查看结果
             </button>
-            <button class="secondary-btn" type="button" id="next-question">
-              ${
-                state.currentQuestionIndex === totalQuestions - 1
-                  ? isQuizComplete(state.answers)
-                    ? '查看结果'
-                    : '检查漏答'
-                  : currentAnswer
-                    ? '下一题'
-                    : '先跳过'
-              }
+            <button class="secondary-btn" id="jump-unanswered" type="button">
+              跳到漏答题
             </button>
-          </div>
-        </article>
-      </section>
-
-      <aside class="quiz-sidebar">
-        <article class="palette-card">
-          <p class="mini-label">题号导航</p>
-          <p class="section-copy">
-            点选项后会自动进入下一题。也可以直接点题号回看或补答。
-          </p>
-          <div class="question-palette">
-            ${renderQuestionPalette()}
+            <button class="secondary-btn" id="back-home" type="button">
+              回到首页
+            </button>
           </div>
         </article>
 
         <article class="palette-card">
           <p class="mini-label">答题提示</p>
           <ul class="helper-list">
-            <li>不需要想“标准答案”，按直觉选更准。</li>
-            <li>这套题背后有 6 个隐藏维度，但结果页只会展示最终人格。</li>
-            <li>如果最后提示有漏答，会自动带你跳去第一道没做的题。</li>
+            <li>选最像你的直觉，不需要想标准答案。</li>
+            <li>每题都用 1 到 5 分量表，后台会自动处理正反向记分。</li>
+            <li>如果你中途停下，再回来时这一页还能继续补答。</li>
           </ul>
         </article>
       </aside>
@@ -456,7 +482,7 @@ function renderResultScreen() {
     <main class="layout result-layout">
       <section class="result-hero">
         <div class="result-copy">
-          <p class="eyebrow">Your Result</p>
+          <p class="eyebrow">${escapeHtml(appMeta.stage)} Result</p>
           <div class="result-badge-row">
             <span class="code-badge">${escapeHtml(result.code)}</span>
             <span class="status-pill">#${String(index).padStart(2, '0')} / 63</span>
@@ -476,8 +502,8 @@ function renderResultScreen() {
               <span>隐藏索引</span>
             </article>
             <article class="stat-card">
-              <strong>64</strong>
-              <span>结果库映射成功</span>
+              <strong>v${escapeHtml(appMeta.version)}</strong>
+              <span>当前 beta 版本</span>
             </article>
           </div>
 
@@ -508,9 +534,7 @@ function renderResultScreen() {
         <div class="section-heading">
           <p class="eyebrow">Result Copy</p>
           <h2>这次结果不只给你一个名字</h2>
-          <p class="section-copy">
-            这部分是用户真正会读完、会截图、会转发的内容。现在每个结果都已经补成统一格式。
-          </p>
+          <p class="section-copy">这部分是用户真正会截图、会转发、会反复看的内容。</p>
         </div>
 
         <div class="result-copy-grid">
@@ -543,9 +567,7 @@ function renderResultScreen() {
         <div class="section-heading">
           <p class="eyebrow">Hot Comments</p>
           <h2>属于你的高频弹幕</h2>
-          <p class="section-copy">
-            很多人看结果页，真正会记住的其实就是这几句。它们现在会跟着每个结果一起切换。
-          </p>
+          <p class="section-copy">很多人最后记住的就是这几句，所以它们会跟着每个结果一起切换。</p>
         </div>
 
         <div class="barrage-grid">
@@ -566,8 +588,7 @@ function renderResultScreen() {
         <summary>查看幕后算分</summary>
         <div class="details-content">
           <p class="section-copy">
-            这部分是开发逻辑，不会干扰前台结果展示。你的最终结果来自 6 个隐藏维度组成的二进制索引
-            <strong>${binaryIndex}</strong>，十进制是 <strong>${index}</strong>。
+            你的最终结果来自 6 个隐藏维度组成的二进制索引 <strong>${binaryIndex}</strong>，十进制是 <strong>${index}</strong>。
           </p>
 
           <div class="details-grid">
@@ -600,9 +621,7 @@ function renderResultScreen() {
         <div class="section-heading">
           <p class="eyebrow">Neighbor Types</p>
           <h2>和你同片宇宙的另外几型</h2>
-          <p class="section-copy">
-            这些是索引上离你最近的几型，不代表你次高概率会落在这里，但很适合用来继续看整套结果的气质。
-          </p>
+          <p class="section-copy">这些是索引上离你最近的几型，很适合继续翻看整套结果的气质。</p>
         </div>
 
         <div class="mechanics-grid">
@@ -630,38 +649,30 @@ function renderResultScreen() {
 function renderTopbar() {
   const answeredCount = getAnsweredCount(state.answers)
 
-  if (state.view === 'quiz') {
-    return `
-      <header class="topbar">
-        <button class="brand brand-button" type="button" id="back-home-top">Mood Atlas</button>
-        <div class="topbar-meta">
-          <span class="status-pill">第 ${state.currentQuestionIndex + 1} 题 / ${totalQuestions}</span>
-          <span class="ghost-link is-static">已答 ${answeredCount} 题</span>
-        </div>
-      </header>
-    `
-  }
-
-  if (state.view === 'result') {
-    return `
-      <header class="topbar">
-        <button class="brand brand-button" type="button" id="back-home-top">Mood Atlas</button>
-        <div class="topbar-meta">
-          <span class="status-pill">结果已生成</span>
-          <span class="ghost-link is-static">48 题已完成</span>
-        </div>
-      </header>
-    `
-  }
-
   return `
     <header class="topbar">
-      <a class="brand" href="#hero">Mood Atlas</a>
+      <button class="brand brand-button" type="button" id="back-home-top">Mood Atlas</button>
       <div class="topbar-meta">
-        <span class="status-pill">48 题 / 6 维 / 64 结果</span>
-        <a class="ghost-link" href="#library">浏览结果库</a>
+        <span class="status-pill">${escapeHtml(appMeta.stage)} · v${escapeHtml(appMeta.version)}</span>
+        ${
+          state.view === 'quiz'
+            ? `<span class="ghost-link is-static">已答 ${answeredCount}/${totalQuestions}</span>`
+            : state.view === 'result'
+              ? '<span class="ghost-link is-static">结果已生成</span>'
+              : '<a class="ghost-link" href="#library">浏览结果库</a>'
+        }
       </div>
     </header>
+  `
+}
+
+function renderFooter() {
+  return `
+    <footer class="site-footer">
+      <span>${escapeHtml(appMeta.stage)} · v${escapeHtml(appMeta.version)}</span>
+      <span>静态网页版 64 型人格测试</span>
+      <a href="${escapeHtml(appMeta.repoUrl)}" target="_blank" rel="noreferrer">GitHub</a>
+    </footer>
   `
 }
 
@@ -670,7 +681,7 @@ function render() {
     state.view = 'quiz'
   }
 
-  document.title = 'Mood Atlas | 64 型人格测试'
+  document.title = `Mood Atlas | ${appMeta.stage} v${appMeta.version}`
 
   app.innerHTML = `
     <div class="page-shell">
@@ -680,17 +691,18 @@ function render() {
       ${state.view === 'home' ? renderHomeScreen() : ''}
       ${state.view === 'quiz' ? renderQuizScreen() : ''}
       ${state.view === 'result' ? renderResultScreen() : ''}
+      ${renderFooter()}
     </div>
   `
 
-  document.querySelector('#start-quiz')?.addEventListener('click', startQuiz)
-  document.querySelector('#random-preview')?.addEventListener('click', pickRandomPreview)
   document.querySelector('#back-home')?.addEventListener('click', goHome)
   document.querySelector('#back-home-top')?.addEventListener('click', goHome)
+  document.querySelector('#start-quiz')?.addEventListener('click', startQuiz)
+  document.querySelector('#random-preview')?.addEventListener('click', pickRandomPreview)
   document.querySelector('#restart-quiz')?.addEventListener('click', restartQuiz)
   document.querySelector('#copy-result')?.addEventListener('click', copyResultText)
-  document.querySelector('#previous-question')?.addEventListener('click', previousQuestion)
-  document.querySelector('#next-question')?.addEventListener('click', nextQuestion)
+  document.querySelector('#submit-quiz')?.addEventListener('click', showResult)
+  document.querySelector('#jump-unanswered')?.addEventListener('click', jumpToFirstUnanswered)
 
   document.querySelector('#result-search')?.addEventListener('input', (event) => {
     state.search = event.target.value
@@ -710,21 +722,23 @@ function render() {
       state.previewCode = button.dataset.openLibrary ?? indexedResults[0].code
       state.view = 'home'
       render()
-      document.querySelector('#library')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      requestAnimationFrame(() => {
+        scrollToSelector('#library')
+      })
     })
   })
 
-  document.querySelectorAll('[data-go-question]').forEach((button) => {
+  document.querySelectorAll('[data-answer-question]').forEach((button) => {
     button.addEventListener('click', () => {
-      const nextIndex = Number(button.dataset.goQuestion)
-      goToQuestion(nextIndex)
-    })
-  })
-
-  document.querySelectorAll('[data-answer-value]').forEach((button) => {
-    button.addEventListener('click', () => {
+      const questionIndex = Number(button.dataset.answerQuestion)
       const value = Number(button.dataset.answerValue)
-      selectAnswer(value)
+      selectAnswer(questionIndex, value)
+    })
+  })
+
+  document.querySelectorAll('[data-jump-axis]').forEach((button) => {
+    button.addEventListener('click', () => {
+      scrollToSelector(`#axis-${button.dataset.jumpAxis}`)
     })
   })
 
@@ -733,6 +747,14 @@ function render() {
     searchInput?.focus()
     searchInput?.setSelectionRange(searchInput.value.length, searchInput.value.length)
     state.focusSearchAfterRender = false
+  }
+
+  if (state.view === 'quiz' && state.preservedQuizScrollY !== null) {
+    const preservedScrollY = state.preservedQuizScrollY
+    state.preservedQuizScrollY = null
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: preservedScrollY })
+    })
   }
 }
 

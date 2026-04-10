@@ -102,3 +102,9 @@ export const quizQuestions = [
 ]
 
 export const totalQuestions = quizQuestions.length
+
+export const axisSections = Object.entries(axisMeta).map(([axis, meta]) => ({
+  axis,
+  ...meta,
+  questions: quizQuestions.filter((question) => question.axis === axis),
+}))
