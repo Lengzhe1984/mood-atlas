@@ -470,7 +470,7 @@ h1 {
 }
 
 .portrait-frame {
-  min-height: 258px;
+  min-height: 270px;
   margin-top: 14px;
   padding: 14px 14px 0;
   display: grid;
@@ -486,16 +486,19 @@ h1 {
 }
 
 .portrait-card-home .portrait-frame {
-  min-height: 220px;
+  min-height: 232px;
 }
 
 .portrait-card-result .portrait-frame {
-  min-height: 284px;
+  min-height: 300px;
 }
 
 .portrait-illustration {
   display: block;
   width: 100%;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  filter: drop-shadow(0 10px 16px rgba(39, 31, 24, 0.14));
 }
 
 .portrait-illustration-home {
