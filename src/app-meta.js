@@ -1,15 +1,22 @@
 export const appMeta = {
   stage: 'Beta',
-  version: '0.1.0-beta.7',
+  version: '0.1.0-beta.8',
   repoUrl: 'https://github.com/Lengzhe1984/mood-atlas',
   siteUrl: 'https://lengzhe1984.github.io/mood-atlas/',
-  latestUpdateTitle: '首页更新区改成简版日志',
+  latestUpdateTitle: '64 种结果文案换成新版五段式',
   latestUpdatePoints: [
-    '首页不再展示大面积更新卡片，改成更像软件版本说明的文字形式。',
-    '首页只保留最近 3 次更新内容，阅读路径更短，也更接近 README 的感觉。',
-    '更新区继续保留版本号，后续每次迭代都可以顺着往下追加。',
+    '64 种性格结果统一替换成新版评价文案，整体语气更完整也更像朋友在讲你。',
+    '结果页栏目改成一句话结论、朋友式吐槽、为什么会这样、可爱的地方、提醒。',
+    '首页预览和分享文案也同步使用新字段，不再混用旧版标题。',
   ],
   recentUpdates: [
+    {
+      version: '0.1.0-beta.8',
+      notes: [
+        '64 种结果文案整体改成新版五段式评价。',
+        '结果页、首页预览、复制分享文案同步切到新字段。',
+      ],
+    },
     {
       version: '0.1.0-beta.7',
       notes: [
@@ -22,13 +29,6 @@ export const appMeta = {
       notes: [
         '手机端答题页顶部不再显示 Beta Quiz Flow。',
         '答题提示提前到最上方，更新说明改到答题页底部小字展示。',
-      ],
-    },
-    {
-      version: '0.1.0-beta.5',
-      notes: [
-        '首页移除整段 64 结果预览，减少无效滚动。',
-        'How It Works 改成更新摘要，不再使用三连卡片。',
       ],
     },
   ],

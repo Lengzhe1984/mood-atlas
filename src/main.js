@@ -46,7 +46,7 @@ function getRelatedResults(index) {
 }
 
 function getShareText(result) {
-  return `我测出来是 ${result.code}｜${result.englishName}｜${result.name}\n一句话：${result.verdict}\n吐槽：${result.description}\n#MoodAtlas`
+  return `我测出来是 ${result.code}｜${result.englishName}｜${result.name}\n一句话：${result.verdict}\n朋友式吐槽：${result.friendRoast}\n给我的提醒：${result.reminder}\n#MoodAtlas`
 }
 
 function getAxisAnsweredCount(axis) {
@@ -215,14 +215,12 @@ function renderHomeScreen() {
             <h2>${escapeHtml(preview.name)}</h2>
             <p class="preview-english">${escapeHtml(preview.englishName)}</p>
             <p class="preview-verdict">${escapeHtml(preview.verdict)}</p>
-            <p class="preview-body">${escapeHtml(preview.description)}</p>
+            <p class="preview-body">${escapeHtml(preview.friendRoast)}</p>
             <div class="preview-points">
-              ${preview.strengths
-                .slice(0, 2)
-                .map((item) => `<span class="preview-chip">${escapeHtml(item)}</span>`)
-                .join('')}
+              <span class="preview-chip">可爱的地方</span>
             </div>
-            <p class="preview-tip">隐藏痛点：${escapeHtml(preview.hiddenPain)}</p>
+            <p class="preview-note">${escapeHtml(preview.charm)}</p>
+            <p class="preview-tip">给你的提醒：${escapeHtml(preview.reminder)}</p>
           </div>
         </aside>
       </section>
@@ -412,7 +410,7 @@ function renderResultScreen() {
           <h1>${escapeHtml(result.name)}</h1>
           <p class="result-english hero-english">${escapeHtml(result.englishName)}</p>
           <p class="result-verdict hero-verdict">${escapeHtml(result.verdict)}</p>
-          <p class="lede">${escapeHtml(result.description)}</p>
+          <p class="lede">${escapeHtml(result.friendRoast)}</p>
 
           <div class="stat-row">
             <article class="stat-card">
@@ -455,8 +453,8 @@ function renderResultScreen() {
       <section class="result-content-panel">
         <div class="section-heading">
           <p class="eyebrow">Result Copy</p>
-          <h2>这次结果不只给你一个名字</h2>
-          <p class="section-copy">这部分是用户真正会截图、会转发、会反复看的内容。</p>
+          <h2>这次结果页换成新版五段式文案</h2>
+          <p class="section-copy">从一句话结论到提醒，整页内容都换成了更像朋友在认真点评你的版本。</p>
         </div>
 
         <div class="result-copy-grid">
@@ -467,42 +465,24 @@ function renderResultScreen() {
           </article>
 
           <article class="copy-card">
-            <p class="mini-label">吐槽描述</p>
-            <p class="copy-body">${escapeHtml(result.description)}</p>
+            <p class="mini-label">朋友式吐槽</p>
+            <p class="copy-body">${escapeHtml(result.friendRoast)}</p>
           </article>
 
           <article class="copy-card">
-            <p class="mini-label">隐藏痛点</p>
-            <p class="copy-body">${escapeHtml(result.hiddenPain)}</p>
+            <p class="mini-label">其实你为什么会这样</p>
+            <p class="copy-body">${escapeHtml(result.why)}</p>
           </article>
 
           <article class="copy-card copy-card-wide">
-            <p class="mini-label">优点</p>
-            <ul class="copy-list">
-              ${result.strengths.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
-            </ul>
+            <p class="mini-label">你这个类型可爱的地方</p>
+            <p class="copy-body">${escapeHtml(result.charm)}</p>
           </article>
-        </div>
-      </section>
 
-      <section class="mechanics-panel">
-        <div class="section-heading">
-          <p class="eyebrow">Hot Comments</p>
-          <h2>属于你的高频弹幕</h2>
-          <p class="section-copy">很多人最后记住的就是这几句，所以它们会跟着每个结果一起切换。</p>
-        </div>
-
-        <div class="barrage-grid">
-          ${result.barrage
-            .map(
-              (item) => `
-                <article class="barrage-card">
-                  <p class="mini-label">${escapeHtml(item.label)}</p>
-                  <p class="copy-body">${escapeHtml(item.text)}</p>
-                </article>
-              `,
-            )
-            .join('')}
+          <article class="copy-card copy-card-wide">
+            <p class="mini-label">给你的提醒</p>
+            <p class="copy-body">${escapeHtml(result.reminder)}</p>
+          </article>
         </div>
       </section>
 
