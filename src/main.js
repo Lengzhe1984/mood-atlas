@@ -11,10 +11,8 @@ const answerLabelByValue = Object.fromEntries(answerOptions.map((option) => [opt
 const state = {
   view: 'home',
   answers: Array(totalQuestions).fill(null),
-  search: '',
   previewCode: 'LOOP',
   copyState: 'idle',
-  focusSearchAfterRender: false,
   preservedQuizScrollY: null,
 }
 
@@ -31,30 +29,6 @@ function escapeHtml(value) {
 
 function getPreviewResult() {
   return indexedResults.find((result) => result.code === state.previewCode) ?? indexedResults[0]
-}
-
-function getFilteredResults() {
-  const keyword = state.search.trim().toLowerCase()
-
-  if (!keyword) {
-    return indexedResults
-  }
-
-  return indexedResults.filter((result) =>
-    [
-      result.code,
-      result.englishName,
-      result.name,
-      result.verdict,
-      result.description,
-      result.hiddenPain,
-      ...result.strengths,
-      ...result.barrage.map((item) => item.text),
-    ]
-      .join(' ')
-      .toLowerCase()
-      .includes(keyword),
-  )
 }
 
 function getRelatedResults(index) {
@@ -172,27 +146,6 @@ function pickRandomPreview() {
   render()
 }
 
-function renderResultCard(result, activeCode = '') {
-  const isActive = result.code === activeCode
-
-  return `
-    <button
-      class="result-card${isActive ? ' is-active' : ''}"
-      type="button"
-      data-preview-code="${escapeHtml(result.code)}"
-    >
-      <div class="result-top">
-        <span class="result-code">${escapeHtml(result.code)}</span>
-        <span class="result-index">#${String(result.index).padStart(2, '0')}</span>
-      </div>
-      <h3 class="result-name">${escapeHtml(result.name)}</h3>
-      <p class="result-english">${escapeHtml(result.englishName)}</p>
-      <p class="result-verdict">${escapeHtml(result.verdict)}</p>
-      <p class="result-description">${escapeHtml(result.description)}</p>
-    </button>
-  `
-}
-
 function renderScaleLegend() {
   return `
     <div class="scale-legend">
@@ -212,7 +165,6 @@ function renderScaleLegend() {
 
 function renderHomeScreen() {
   const preview = getPreviewResult()
-  const filteredResults = getFilteredResults()
 
   return `
     <main class="layout">
@@ -270,66 +222,39 @@ function renderHomeScreen() {
         </aside>
       </section>
 
-      <section class="mechanics-panel">
+      <section class="mechanics-panel update-panel" id="latest-update">
         <div class="section-heading">
-          <p class="eyebrow">How It Works</p>
-          <h2>这版重点把答题体验做顺了</h2>
+          <p class="eyebrow">Latest Update</p>
+          <h2>${escapeHtml(appMeta.latestUpdateTitle)}</h2>
           <p class="section-copy">
-            现在答题页改成分区长卷，手机端不用一题一翻，桌面端也能更快扫完整体进度。后台计分逻辑保持不变，仍然是 6 维隐藏轴映射到 64 个结果。
+            首页现在只保留开始测试前真正有用的信息，不再把 64 种结果预览整段堆在首屏下面。后台计分逻辑不变，仍然是 6 维隐藏轴映射到 64 个结果。
           </p>
         </div>
 
-        <div class="mechanics-grid">
-          <article class="mechanic-card">
-            <span class="mechanic-step">01</span>
-            <h3>单页答题</h3>
-            <p>按 6 个维度分组展示，一次看完一整段，尽量少翻页。</p>
+        <div class="update-grid">
+          <article class="update-card update-card-main">
+            <p class="mini-label">Beta ${escapeHtml(appMeta.version)}</p>
+            <h3>首页收短了，进入测试更快。</h3>
+            <p class="section-copy">
+              预览只留一型做气质展示，答题入口和版本变化放在更靠前的位置。手机端不用先滑过一大段卡片，桌面端也不会被重复信息拖长。
+            </p>
           </article>
-          <article class="mechanic-card">
-            <span class="mechanic-step">02</span>
-            <h3>更稳的移动端布局</h3>
-            <p>缩小遮挡风险，去掉容易挡内容的结构，按钮区也更紧凑。</p>
+
+          <article class="update-card">
+            <p class="mini-label">This Release</p>
+            <ul class="update-list">
+              ${appMeta.latestUpdatePoints.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
+            </ul>
           </article>
-          <article class="mechanic-card">
-            <span class="mechanic-step">03</span>
-            <h3>版本化 beta</h3>
-            <p>这版开始按 beta 版本维护，每次更新同步改版本号和 README。</p>
+
+          <article class="update-card">
+            <p class="mini-label">Still In Place</p>
+            <div class="chip-row">
+              ${['48 题量表', '6 维隐藏计分', '64 结果映射', '单页答题', '移动端优化', 'GitHub Pages']
+                .map((item) => `<span class="result-chip">${escapeHtml(item)}</span>`)
+                .join('')}
+            </div>
           </article>
-        </div>
-      </section>
-
-      <section class="library-panel" id="library">
-        <div class="section-heading">
-          <p class="eyebrow">Result Library</p>
-          <h2>64 种人格结果可以直接预览</h2>
-          <p class="section-copy">
-            点击任意卡片会切换上方预览。搜索现在也支持新代号、英文名、中文名和结果文案关键词。
-          </p>
-        </div>
-
-        <div class="library-toolbar">
-          <label class="search-box" for="result-search">
-            <span>搜索代号、英文、中文或关键词</span>
-            <input
-              id="result-search"
-              type="search"
-              value="${escapeHtml(state.search)}"
-              placeholder="比如：LEDGR、Why Machine、回春人、复盘"
-              autocomplete="off"
-            />
-          </label>
-          <p class="library-count">当前显示 ${filteredResults.length} / ${indexedResults.length}</p>
-        </div>
-
-        <div class="results-grid">
-          ${filteredResults.length
-            ? filteredResults.map((result) => renderResultCard(result, state.previewCode)).join('')
-            : `
-              <div class="empty-state">
-                <h3>没搜到对应类型</h3>
-                <p>换个关键词试试，或者直接翻卡片库看看。</p>
-              </div>
-            `}
         </div>
       </section>
     </main>
@@ -659,7 +584,7 @@ function renderTopbar() {
             ? `<span class="ghost-link is-static">已答 ${answeredCount}/${totalQuestions}</span>`
             : state.view === 'result'
               ? '<span class="ghost-link is-static">结果已生成</span>'
-              : '<a class="ghost-link" href="#library">浏览结果库</a>'
+              : '<a class="ghost-link" href="#latest-update">查看本次更新</a>'
         }
       </div>
     </header>
@@ -704,26 +629,13 @@ function render() {
   document.querySelector('#submit-quiz')?.addEventListener('click', showResult)
   document.querySelector('#jump-unanswered')?.addEventListener('click', jumpToFirstUnanswered)
 
-  document.querySelector('#result-search')?.addEventListener('input', (event) => {
-    state.search = event.target.value
-    state.focusSearchAfterRender = true
-    render()
-  })
-
-  document.querySelectorAll('[data-preview-code]').forEach((button) => {
-    button.addEventListener('click', () => {
-      state.previewCode = button.dataset.previewCode ?? indexedResults[0].code
-      render()
-    })
-  })
-
   document.querySelectorAll('[data-open-library]').forEach((button) => {
     button.addEventListener('click', () => {
       state.previewCode = button.dataset.openLibrary ?? indexedResults[0].code
       state.view = 'home'
       render()
       requestAnimationFrame(() => {
-        scrollToSelector('#library')
+        scrollToSelector('#hero')
       })
     })
   })
@@ -741,13 +653,6 @@ function render() {
       scrollToSelector(`#axis-${button.dataset.jumpAxis}`)
     })
   })
-
-  if (state.focusSearchAfterRender) {
-    const searchInput = document.querySelector('#result-search')
-    searchInput?.focus()
-    searchInput?.setSelectionRange(searchInput.value.length, searchInput.value.length)
-    state.focusSearchAfterRender = false
-  }
 
   if (state.view === 'quiz' && state.preservedQuizScrollY !== null) {
     const preservedScrollY = state.preservedQuizScrollY

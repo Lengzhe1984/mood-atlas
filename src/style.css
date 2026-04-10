@@ -118,6 +118,7 @@ button {
 .hero-panel,
 .mechanics-panel,
 .library-panel,
+.update-card,
 .result-content-panel,
 .result-hero,
 .quiz-intro-card,
@@ -233,6 +234,7 @@ button {
 .quiz-intro-card,
 .axis-section,
 .palette-card,
+.update-card,
 .details-panel {
   position: relative;
   overflow: hidden;
@@ -496,6 +498,41 @@ h1 {
 .quiz-intro-card,
 .axis-section {
   padding: 28px;
+}
+
+.update-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) repeat(2, minmax(0, 0.82fr));
+  gap: 14px;
+}
+
+.update-card {
+  padding: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 252, 247, 0.95) 0%, rgba(255, 248, 242, 0.88) 100%);
+  display: grid;
+  gap: 14px;
+}
+
+.update-card-main {
+  background:
+    radial-gradient(circle at top right, rgba(211, 93, 54, 0.12), transparent 30%),
+    linear-gradient(180deg, rgba(255, 252, 247, 0.96) 0%, rgba(255, 246, 239, 0.9) 100%);
+}
+
+.update-card h3 {
+  font-size: 1.8rem;
+  line-height: 1.08;
+}
+
+.update-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--ink-soft);
+}
+
+.update-list li + li {
+  margin-top: 10px;
 }
 
 .section-heading {
@@ -1009,6 +1046,7 @@ h1 {
   }
 
   .mechanics-grid,
+  .update-grid,
   .results-grid,
   .details-grid,
   .barrage-grid,
@@ -1042,6 +1080,7 @@ h1 {
   .quiz-intro-card,
   .axis-section,
   .palette-card,
+  .update-card,
   .details-panel {
     padding: 24px;
     border-radius: 28px;
@@ -1049,6 +1088,7 @@ h1 {
 
   .stat-row,
   .mechanics-grid,
+  .update-grid,
   .results-grid,
   .details-grid,
   .barrage-grid,
