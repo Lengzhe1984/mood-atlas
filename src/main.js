@@ -1,5 +1,6 @@
 import './style.css'
 import { appMeta } from './app-meta.js'
+import { getCharacterArt } from './character-art.js'
 import { answerOptions, axisSections, quizQuestions, totalQuestions } from './quiz-data.js'
 import { indexedResults } from './results.js'
 import { getAnsweredCount, getFinalResult, isQuizComplete } from './scoring.js'
@@ -168,8 +169,24 @@ function renderScaleLegend() {
   `
 }
 
+function renderCharacterCard(result, variant = 'result') {
+  const art = getCharacterArt(result.code, result.name)
+  const sizeClass = variant === 'home' ? 'pixel-portrait-home' : 'pixel-portrait-result'
+
+  return `
+    <article class="character-card">
+      <p class="mini-label">Pixel Character</p>
+      <div class="pixel-stage">
+        <img class="pixel-portrait ${sizeClass}" src="${art.src}" alt="${escapeHtml(art.alt)}" />
+      </div>
+      <p class="pixel-caption">${escapeHtml(art.caption)}</p>
+    </article>
+  `
+}
+
 function renderHomeScreen() {
   const preview = getPreviewResult()
+  const previewArt = getCharacterArt(preview.code, preview.name)
 
   return `
     <main class="layout">
@@ -178,7 +195,7 @@ function renderHomeScreen() {
           <p class="eyebrow">Beta v${escapeHtml(appMeta.version)}</p>
           <h1>前台像梗图人格宇宙，后台其实是六维模型。</h1>
           <p class="lede">
-            这版已经把 48 道题、6 个隐藏维度和 64 个结果映射全部接进来了。现在答题页也改成了更适合手机和桌面的单页式结构，尽量少翻页、少遮挡、少打断。
+            这版已经把 48 道题、6 个隐藏维度和 64 个结果映射全部接进来了，现在还给每一型都配上了像素风角色造型。答题页继续维持更适合手机和桌面的单页式结构，尽量少翻页、少遮挡、少打断。
           </p>
 
           <div class="stat-row">
@@ -202,7 +219,7 @@ function renderHomeScreen() {
           </div>
 
           <div class="chip-row">
-            ${['单页答题', '移动端优化', '中英双名', 'GitHub Pages']
+            ${['像素人物卡', '单页答题', '移动端优化', '中英双名']
               .map((item) => `<span class="result-chip">${escapeHtml(item)}</span>`)
               .join('')}
           </div>
@@ -211,6 +228,16 @@ function renderHomeScreen() {
         <aside class="preview-panel">
           <div class="preview-card">
             <p class="mini-label">结果预览</p>
+            <div class="preview-art-wrap">
+              <div class="pixel-stage pixel-stage-compact">
+                <img
+                  class="pixel-portrait pixel-portrait-home"
+                  src="${previewArt.src}"
+                  alt="${escapeHtml(previewArt.alt)}"
+                />
+              </div>
+              <p class="pixel-caption">${escapeHtml(previewArt.caption)}</p>
+            </div>
             <span class="code-badge">${escapeHtml(preview.code)}</span>
             <h2>${escapeHtml(preview.name)}</h2>
             <p class="preview-english">${escapeHtml(preview.englishName)}</p>
@@ -443,6 +470,7 @@ function renderResultScreen() {
         </div>
 
         <aside class="preview-panel">
+          ${renderCharacterCard(result, 'result')}
           <div class="share-card">
             <p class="mini-label">分享文案预览</p>
             <pre class="share-copy">${escapeHtml(getShareText(result))}</pre>

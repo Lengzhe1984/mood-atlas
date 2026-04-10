@@ -127,6 +127,7 @@ button {
 .stat-card,
 .preview-card,
 .share-card,
+.character-card,
 .mechanic-card,
 .result-card,
 .details-panel,
@@ -411,11 +412,14 @@ h1 {
 }
 
 .preview-panel {
-  display: flex;
+  display: grid;
+  gap: 14px;
+  align-content: start;
 }
 
 .preview-card,
-.share-card {
+.share-card,
+.character-card {
   width: 100%;
   padding: 26px;
   border-radius: 28px;
@@ -424,6 +428,48 @@ h1 {
   gap: 14px;
   background:
     linear-gradient(180deg, rgba(255, 252, 247, 0.95) 0%, rgba(255, 246, 239, 0.9) 100%);
+}
+
+.preview-art-wrap {
+  display: grid;
+  gap: 10px;
+}
+
+.pixel-stage {
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top, rgba(211, 93, 54, 0.1), transparent 38%),
+    rgba(255, 255, 255, 0.56);
+  border: 1px solid rgba(31, 24, 19, 0.08);
+}
+
+.pixel-stage-compact {
+  padding: 8px;
+}
+
+.pixel-portrait {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.pixel-portrait-home {
+  max-width: 176px;
+}
+
+.pixel-portrait-result {
+  max-width: 280px;
+}
+
+.pixel-caption {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
 }
 
 .preview-verdict,
@@ -496,6 +542,10 @@ h1 {
   margin: 0;
   color: var(--ink-soft);
   font-size: 0.98rem;
+}
+
+.character-card .mini-label {
+  margin: 0;
 }
 
 .mechanics-panel,
@@ -1191,6 +1241,10 @@ h1 {
   .preview-card h2,
   .section-heading h2 {
     font-size: 2.15rem;
+  }
+
+  .pixel-portrait-result {
+    max-width: 220px;
   }
 
   .axis-section-head,
