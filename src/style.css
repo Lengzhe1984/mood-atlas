@@ -500,39 +500,61 @@ h1 {
   padding: 28px;
 }
 
-.update-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) repeat(2, minmax(0, 0.82fr));
-  gap: 14px;
-}
-
-.update-card {
-  padding: 22px;
-  background:
-    linear-gradient(180deg, rgba(255, 252, 247, 0.95) 0%, rgba(255, 248, 242, 0.88) 100%);
+.release-log {
   display: grid;
   gap: 14px;
 }
 
-.update-card-main {
-  background:
-    radial-gradient(circle at top right, rgba(211, 93, 54, 0.12), transparent 30%),
-    linear-gradient(180deg, rgba(255, 252, 247, 0.96) 0%, rgba(255, 246, 239, 0.9) 100%);
+.release-entry {
+  padding-top: 14px;
+  border-top: 1px solid rgba(31, 24, 19, 0.08);
 }
 
-.update-card h3 {
-  font-size: 1.8rem;
-  line-height: 1.08;
+.release-entry:first-child {
+  padding-top: 0;
+  border-top: 0;
 }
 
-.update-list {
-  margin: 0;
+.release-entry-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.release-version,
+.release-current {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+}
+
+.release-version {
+  padding: 0.42rem 0.72rem;
+  font-family: var(--mono-font);
+  font-size: 0.84rem;
+  color: var(--accent-deep);
+  background: rgba(211, 93, 54, 0.1);
+}
+
+.release-current {
+  padding: 0.34rem 0.62rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--teal);
+  background: rgba(31, 117, 105, 0.1);
+}
+
+.release-entry-list {
+  margin: 10px 0 0;
   padding-left: 1.1rem;
   color: var(--ink-soft);
 }
 
-.update-list li + li {
-  margin-top: 10px;
+.release-entry-list li + li {
+  margin-top: 8px;
 }
 
 .section-heading {
@@ -544,6 +566,20 @@ h1 {
   font-size: clamp(2rem, 3vw, 3.2rem);
   line-height: 1.02;
   letter-spacing: -0.03em;
+}
+
+.update-panel .section-heading {
+  margin-bottom: 14px;
+}
+
+.update-panel .section-heading h2 {
+  font-size: clamp(1.45rem, 2vw, 1.85rem);
+  letter-spacing: -0.02em;
+}
+
+.update-panel .section-copy {
+  max-width: 72ch;
+  font-size: 0.95rem;
 }
 
 .mechanics-grid {
@@ -1078,7 +1114,6 @@ h1 {
   }
 
   .mechanics-grid,
-  .update-grid,
   .results-grid,
   .details-grid,
   .barrage-grid,
@@ -1121,7 +1156,6 @@ h1 {
 
   .stat-row,
   .mechanics-grid,
-  .update-grid,
   .results-grid,
   .details-grid,
   .barrage-grid,

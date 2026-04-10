@@ -229,37 +229,27 @@ function renderHomeScreen() {
 
       <section class="mechanics-panel update-panel" id="latest-update">
         <div class="section-heading">
-          <p class="eyebrow">Latest Update</p>
-          <h2>${escapeHtml(appMeta.latestUpdateTitle)}</h2>
-          <p class="section-copy">
-            首页现在只保留开始测试前真正有用的信息，不再把 64 种结果预览整段堆在首屏下面。后台计分逻辑不变，仍然是 6 维隐藏轴映射到 64 个结果。
-          </p>
+          <p class="eyebrow">Release Notes</p>
+          <h2>最近更新</h2>
+          <p class="section-copy">用更轻的文字方式记录最近几次版本变化，像 README 一样直接看重点。</p>
         </div>
 
-        <div class="update-grid">
-          <article class="update-card update-card-main">
-            <p class="mini-label">Beta ${escapeHtml(appMeta.version)}</p>
-            <h3>首页收短了，进入测试更快。</h3>
-            <p class="section-copy">
-              预览只留一型做气质展示，答题入口和版本变化放在更靠前的位置。手机端不用先滑过一大段卡片，桌面端也不会被重复信息拖长。
-            </p>
-          </article>
-
-          <article class="update-card">
-            <p class="mini-label">This Release</p>
-            <ul class="update-list">
-              ${appMeta.latestUpdatePoints.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
-            </ul>
-          </article>
-
-          <article class="update-card">
-            <p class="mini-label">Still In Place</p>
-            <div class="chip-row">
-              ${['48 题量表', '6 维隐藏计分', '64 结果映射', '单页答题', '移动端优化', 'GitHub Pages']
-                .map((item) => `<span class="result-chip">${escapeHtml(item)}</span>`)
-                .join('')}
-            </div>
-          </article>
+        <div class="release-log">
+          ${appMeta.recentUpdates
+            .map(
+              (item) => `
+                <article class="release-entry">
+                  <div class="release-entry-head">
+                    <span class="release-version">v${escapeHtml(item.version)}</span>
+                    ${item.version === appMeta.version ? '<span class="release-current">current</span>' : ''}
+                  </div>
+                  <ul class="release-entry-list">
+                    ${item.notes.map((note) => `<li>${escapeHtml(note)}</li>`).join('')}
+                  </ul>
+                </article>
+              `,
+            )
+            .join('')}
         </div>
       </section>
     </main>
