@@ -236,23 +236,25 @@ function renderHomeScreen() {
       <section class="hero-panel" id="hero">
         <div class="hero-copy">
           <p class="eyebrow">Beta v${escapeHtml(appMeta.version)}</p>
-          <h1>前台像梗图人格宇宙，后台其实是六维模型。</h1>
-          <p class="lede">
-            这版已经把 48 道题、6 个隐藏维度和 64 个结果映射全部接进来了，现在还把结果卡改成了更接近人格海报的插画版。答题页继续维持更适合手机和桌面的单页式结构，尽量少翻页、少遮挡、少打断。
-          </p>
+          <h1>别测 MBTI 了，<br />你这点毛病四个字母装不下。</h1>
+          <div class="hero-story">
+            <p class="lede story-line">有的人一委屈就先说没事。</p>
+            <p class="lede story-line">有的人明明很在意，还要装得像也就那样。还有的人一到晚上，脑子里那些白天没来得及处理的破事，就自动开始排队上播。</p>
+            <p class="lede story-line">如果这些你多少沾点，那这套测试大概率不会把你夸成什么高冷神秘天选人格。它更擅长的，是把你那些小别扭、小反应、小毛病，说得很像你。</p>
+          </div>
 
           <div class="stat-row">
             <article class="stat-card">
               <strong>48</strong>
-              <span>题目已接入</span>
+              <span>不用做阅读理解，凭直觉选就行</span>
             </article>
             <article class="stat-card">
               <strong>6</strong>
-              <span>隐藏维度在后台计分</span>
+              <span>嘴上是梗，后台是六维模型</span>
             </article>
             <article class="stat-card">
               <strong>64</strong>
-              <span>独立结果映射完成</span>
+              <span>每一种都比“INFP”具体一点</span>
             </article>
           </div>
 
@@ -262,7 +264,7 @@ function renderHomeScreen() {
           </div>
 
           <div class="chip-row">
-            ${['结果海报卡', '几何头像', '移动端优化', '中英双名']
+            ${['像素人物卡', '单页答题', '移动端优化', '中英双名']
               .map((item) => `<span class="result-chip">${escapeHtml(item)}</span>`)
               .join('')}
           </div>

@@ -261,6 +261,15 @@ button {
   gap: 22px;
 }
 
+.hero-story {
+  display: grid;
+  gap: 12px;
+}
+
+.story-line {
+  margin: 0;
+}
+
 .eyebrow,
 .mini-label,
 .search-box span,
