@@ -2,6 +2,10 @@
 
 一个基于静态前端实现的 64 型人格测试网页。
 
+在线地址：
+
+- https://lengzhe1984.github.io/mood-atlas/
+
 ## Features
 
 - 48 道量表题

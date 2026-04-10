@@ -1,3 +1,5 @@
+import { axisMeta } from './quiz-data.js'
+
 const resultProfilesByCode = {
   OJBK: {
     code: 'OJBK',
@@ -385,6 +387,326 @@ const resultProfilesByCode = {
   },
 }
 
+function defineNarrative(verdict, hiddenPain) {
+  return { verdict, hiddenPain }
+}
+
+const resultNarrativesByCode = {
+  OJBK: defineNarrative(
+    '你不是佛，你只是懒得把有限精力花在无效争论上。',
+    '别人总把你的“都行”当真，久了你连认真表达都嫌麻烦。',
+  ),
+  ATMR: defineNarrative(
+    '你老是先替关系兜底，最后把自己兜得最累。',
+    '最伤的不是付出，而是别人慢慢把你的补位当成理所当然。',
+  ),
+  SOLO: defineNarrative(
+    '你习惯独自消化一切，连脆弱都要先自助处理。',
+    '你太熟悉“说了也未必有用”，所以很多情绪只能在心里风干。',
+  ),
+  FAKE: defineNarrative(
+    '你很会维持体面，但真实感受通常被你收在后台。',
+    '越会演稳定，越容易没人发现你其实早就快掉线了。',
+  ),
+  LOOP: defineNarrative(
+    '你的大脑像个复盘机，不把细节榨干就不肯下班。',
+    '真正累你的往往不是事本身，而是停不下来的二次加工。',
+  ),
+  EMOO: defineNarrative(
+    '白天还能正常营业，深夜就自动切到灵魂审判模式。',
+    '你很多崩溃都发生在别人看不见的时段，所以也更难被接住。',
+  ),
+  ZZZZ: defineNarrative(
+    '你不是不想处理，是系统一有压力就先省电。',
+    '最怕别人把你的缓冲误读成摆烂，却没人看见你其实已经超载。',
+  ),
+  DEAD: defineNarrative(
+    '你的问题不是没想法，是常年像没充满电。',
+    '你知道很多事重要，但能量总在关键时刻先掉到红线。',
+  ),
+  HOLD: defineNarrative(
+    '你会先顶住世界，再慢慢考虑自己会不会裂开。',
+    '别人夸你能扛的同时，也默认你可以一直扛。',
+  ),
+  COLD: defineNarrative(
+    '你一生气就先撤离现场，用安静代替争执。',
+    '你以为自己在止损，别人却常常只读到疏远和关闭。',
+  ),
+  CRYZ: defineNarrative(
+    '你的情绪是真直播，不太擅长把委屈延迟播放。',
+    '你越真，越容易在还没解释前就先被人误解成太敏感。',
+  ),
+  JOKR: defineNarrative(
+    '你总能把难受打包成段子，边流血边负责活跃气氛。',
+    '梗抛得太熟练以后，别人会忘记你也是真的在疼。',
+  ),
+  WILD: defineNarrative(
+    '你活得像高振幅情绪曲线，开心和崩溃都来真的。',
+    '别人只看到你有戏剧张力，只有你知道自己其实很耗命。',
+  ),
+  BOSS: defineNarrative(
+    '你不一定爱管，但你真的受不了场面失控。',
+    '一旦你总是出来收拾，最后很多烂摊子都会自动落到你头上。',
+  ),
+  HEAL: defineNarrative(
+    '你会烂会丧会掉线，但最后大概率还能把自己捞上来。',
+    '外人容易因为你能恢复，就低估你每次沉下去时有多难受。',
+  ),
+  GONE: defineNarrative(
+    '你一烦就蒸发，不是拉黑世界，是在后台自救。',
+    '你消失得越熟练，越容易让人忽略你其实是在硬修自己。',
+  ),
+  SHIT: defineNarrative(
+    '你骂骂咧咧归骂骂咧咧，关键时刻还是会把事捡起来。',
+    '你总把认真藏在脏话后面，久了别人也不太会认真接你的累。',
+  ),
+  FINE: defineNarrative(
+    '你最会把大风大浪压成一句“也就那样”。',
+    '轻描淡写说多了，连真正想被看见的时刻都不知道怎么认真开口。',
+  ),
+  NOPE: defineNarrative(
+    '你对消耗型关系和任务的第一反应就是拒绝加载。',
+    '你不是没热情，只是太怕又把自己浪费在烂局里。',
+  ),
+  WHYU: defineNarrative(
+    '你遇事会先追问为什么，直到把自己问得更累。',
+    '你越想弄明白一切，越容易把自己困在没有标准答案的地方。',
+  ),
+  SORRY: defineNarrative(
+    '你反射弧里自带一句“不好意思”，哪怕根本不是你的锅。',
+    '你总想先缓冲别人的不舒服，结果把自己的边界压得太薄。',
+  ),
+  TIRED: defineNarrative(
+    '你不是经历了什么惊天动地，是一直被细碎生活慢性消耗。',
+    '累得太日常以后，连你自己都很难理直气壮地说“我撑不住了”。',
+  ),
+  PANIC: defineNarrative(
+    '事情还没发生，你的大脑已经先跑完最坏预案。',
+    '警报器开太久以后，你会把本来能过的日子也过成持续应激。',
+  ),
+  DRAMA: defineNarrative(
+    '你的感受器从不开省电模式，什么都容易拉出情绪张力。',
+    '你并不是故意放大，是很多人根本没体验过你那种真实强度。',
+  ),
+  NPCX: defineNarrative(
+    '你在人群里像背景板，但其实一直在安静收集全场信号。',
+    '越习惯隐身，越容易连重要时刻都没人记得来问问你的感受。',
+  ),
+  GLOW: defineNarrative(
+    '你不一定最吵，但你很难真的毫无存在感。',
+    '越容易被注意，越容易在状态差的时候还得维持体面在线。',
+  ),
+  CARE: defineNarrative(
+    '你自带关系雷达，别人一句“没事”你都能听出异常。',
+    '你对别人的波动太敏感，常常先把自己累成全天候预警系统。',
+  ),
+  KIDDO: defineNarrative(
+    '你心里那套想被认真对待的系统，一直都没下线。',
+    '你越真诚越直接，越容易在不够认真的关系里先受伤。',
+  ),
+  MONK: defineNarrative(
+    '你不是看破红尘，你只是懒得再给烂事投入情绪。',
+    '冷掉久了以后，连真正值得的人和事也可能被你一起挡在外面。',
+  ),
+  FWORD: defineNarrative(
+    '你脾气先到，礼貌后到，但事通常还是会做完。',
+    '嘴硬和情绪太快上线时，别人很容易只记住你的冲，不记得你的扛。',
+  ),
+  GLASS: defineNarrative(
+    '你的在意和自尊都摆得很低，所以稍微一碰就会响。',
+    '你最怕的不是一句重话，而是被轻轻带过却没人知道你其实很在意。',
+  ),
+  STUCK: defineNarrative(
+    '你长期卡在想动和动不了之间，像系统一直转圈。',
+    '别人只看见你没动，只有你知道自己早就在心里跑过很多次。',
+  ),
+  CTRL: defineNarrative(
+    '你靠安排明白来获得安全感，越不确定越想接管。',
+    '一旦局面不受控，你的焦虑就会立刻从后台冲到前台。',
+  ),
+  AAAB: defineNarrative(
+    '你对关系的安心感，很大一部分来自算得清楚。',
+    '你不是想斤斤计较，你只是太怕最后又轮到自己吃闷亏。',
+  ),
+  LOVER: defineNarrative(
+    '你心动得快也真，感情系统总是比别人更早上线。',
+    '你最大的危险不是投入，而是把稀缺的真心放错了地方。',
+  ),
+  EXXX: defineNarrative(
+    '你表面翻篇很快，但旧情绪会在脑子里长期缓存。',
+    '你难的不是承认过去，而是那些回收不掉的余温总会突然返场。',
+  ),
+  MUMM: defineNarrative(
+    '你照顾人几乎是本能，提醒和操心就是你的爱语。',
+    '你太容易把关心做成默认值，结果常常忘了自己也需要被照顾。',
+  ),
+  TANK: defineNarrative(
+    '你可靠得像工具箱，先扛先忍先消化几乎成了本能。',
+    '真正磨损你的不是一次大事，而是长期都没人问你需不需要停一下。',
+  ),
+  SNEAK: defineNarrative(
+    '你解决不舒服的方式往往不是对抗，而是悄悄后退。',
+    '你避开冲突的同时，也常把自己真正想说的话一起撤掉了。',
+  ),
+  BLUNT: defineNarrative(
+    '你讲真话的速度通常快过你包装真话的耐心。',
+    '你明明是想减少误会，却常常因为太直先制造一点工伤。',
+  ),
+  MOODY: defineNarrative(
+    '你的内在天气系统很活跃，情绪切换不一定提前打招呼。',
+    '你自己都还没来得及理解变化，别人就先给你贴上难搞标签了。',
+  ),
+  DIZZY: defineNarrative(
+    '你不是笨，是现实世界经常把你吵到灵魂出走。',
+    '越容易走神断片，越容易在需要高度在线的生活里对自己生气。',
+  ),
+  CHILL: defineNarrative(
+    '你有种让人又急又羡慕的松弛感，很多事不愿意绷太紧。',
+    '别人夸你松弛的时候，也可能顺手把你的认真和边界一起看轻了。',
+  ),
+  HURRY: defineNarrative(
+    '你最大的特点不是快，而是对卡顿的忍耐值极低。',
+    '你不是爱催，是事情一旦悬着，你整个人都会被拖得很烦。',
+  ),
+  DODGE: defineNarrative(
+    '你擅长先绕开难题，等自己活下来再处理。',
+    '逃得过一时的压迫感，却很难完全逃过事情迟早要回来的时刻。',
+  ),
+  SWEET: defineNarrative(
+    '你不是嘴甜，你是心太软，见不得别人可怜巴巴。',
+    '你明知道该收一点，还是会在别人一示弱时忍不住双手奉上。',
+  ),
+  RUDEY: defineNarrative(
+    '你说话带刺但心不坏，欠揍感和靠谱感经常一起出现。',
+    '你太会用损话挡真心，结果很多温柔都只能靠熟人才看得懂。',
+  ),
+  NERDY: defineNarrative(
+    '你在意得很深，但表达总爱拐几道弯。',
+    '你越想把真实藏得体面，越容易把自己先拧成一团。',
+  ),
+  YAYAY: defineNarrative(
+    '你的喜欢和冲劲都很明显，脑内“冲吧”按钮特别大。',
+    '上头时你很会点燃生活，回头时也更容易被自己吓一跳。',
+  ),
+  BROKE: defineNarrative(
+    '你不是突然坏掉，是被生活一点点磕出了很多细裂纹。',
+    '最难受的不是大崩一次，而是一直半碎不碎地继续过日子。',
+  ),
+  SMILE: defineNarrative(
+    '你最擅长的不是笑，而是先把场面圆过去。',
+    '你太熟悉顾全别人，于是经常连自己什么时候真的不舒服都要往后排。',
+  ),
+  BUBU: defineNarrative(
+    '你脑补能力太强，一句“哦”都能生成完整连续剧。',
+    '你最累的时候不是发生了什么，而是你已经在脑内演完十版坏结果。',
+  ),
+  GUILT: defineNarrative(
+    '你的良心总在线，甚至在线得有点影响日常使用。',
+    '你会把很多本不该你背的情绪也顺手扛到自己肩上。',
+  ),
+  PUSHY: defineNarrative(
+    '你认定的事就想尽快推进，悬着会让你很不舒服。',
+    '你不是没耐心，是长期半空吊着的状态真的会把你磨疯。',
+  ),
+  SPOIL: defineNarrative(
+    '你对自己可以很狠，对喜欢的人却总会额外心软。',
+    '你最大的破绽不是没原则，是原则一碰到感情就开始打折。',
+  ),
+  RISKY: defineNarrative(
+    '你对“万一成了呢”这句话有种近乎本能的信仰。',
+    '冲得太快的时候，你也会把后果和恢复成本一起赌进去。',
+  ),
+  WORTH: defineNarrative(
+    '你做事前总会先算值不值，不愿再白白浪费自己。',
+    '怕亏太久以后，你有时也会连值得的冒险一起犹豫掉。',
+  ),
+  DONTA: defineNarrative(
+    '你一烦起来最需要的不是沟通，是世界先安静一下。',
+    '情绪缓冲区太小的时候，连你在意的人都可能先被你挡在门外。',
+  ),
+  ICYBB: defineNarrative(
+    '你外面那层冰壳很厚，但里面那块心其实很软。',
+    '你为了不摔坏自己加厚包装，结果也让别人更难及时接近你。',
+  ),
+  CLING: defineNarrative(
+    '你一旦确认关系，就会想靠近、想确认、想得到回应。',
+    '你不是要很多，只是很怕关系一热起来又突然冷回去。',
+  ),
+  HAHAA: defineNarrative(
+    '你习惯先用“哈哈哈”给情绪打个缓冲包。',
+    '你把难受挡得太轻巧，别人就更容易误判你其实没那么难受。',
+  ),
+  SAVER: defineNarrative(
+    '哪里缺人你就先补上，救火几乎是你的默认设置。',
+    '你太常说“还是我来吧”，久了连你自己都会忘记求助这回事。',
+  ),
+  GREYY: defineNarrative(
+    '你不炸眼也不极端，很多东西都藏在灰度里慢慢显形。',
+    '越不高调的人，越容易在需要被认真看见时继续被当成没事。',
+  ),
+  ALIVE: defineNarrative(
+    '你不是不会崩，你是崩完之后大概率还能续上。',
+    '外人常常只看到你又活回来了，却看不到你每次回来的代价。',
+  ),
+}
+
+const axisOrder = ['A', 'B', 'C', 'D', 'E', 'F']
+
+const axisPairStrengths = {
+  AB: {
+    '00': '能把情绪和边界都收稳，不容易被关系轻易拖着跑。',
+    '01': '嘴上可以收着，心里却会认真挂着人，关系里很有耐力。',
+    '10': '感受来得真也表达得真，别人很容易知道你不是在敷衍。',
+    '11': '表达和在乎都很直接，跟你相处通常能感到明确温度。',
+  },
+  CD: {
+    '00': '关键时刻有顶住和接管的能力，烂摊子面前不容易完全失速。',
+    '01': '知道什么时候该先稳住，什么时候该顺势调整，不会硬把自己逼死。',
+    '10': '就算想躺一下，真到需要扛的时候也有把事兜住的本能。',
+    '11': '你会给自己留缓冲，也能根据局面改打法，韧性其实不低。',
+  },
+  EF: {
+    '00': '洞察细节和潜台词很敏锐，同时还能先把情绪降温处理。',
+    '01': '想得细也反应真，既能抓住细节，又能让感受有出口。',
+    '10': '判断直接，不容易被脑内小剧场困太久，处理事情效率高。',
+    '11': '直觉和情绪都在线，气氛感、感染力和当下反应都很强。',
+  },
+}
+
+function getBitsFromIndex(index) {
+  return Object.fromEntries(
+    axisOrder.map((axis, axisIndex) => [axis, (index >> (5 - axisIndex)) & 1]),
+  )
+}
+
+function getFirstSentence(text) {
+  const [firstSentence] = text.split(/[。！？]/)
+  return firstSentence ? `${firstSentence.trim()}。` : text
+}
+
+function buildStrengths(index) {
+  const bits = getBitsFromIndex(index)
+
+  return [
+    axisPairStrengths.AB[`${bits.A}${bits.B}`],
+    axisPairStrengths.CD[`${bits.C}${bits.D}`],
+    axisPairStrengths.EF[`${bits.E}${bits.F}`],
+    `你的六维落点更偏向 ${axisOrder
+      .map((axis) =>
+        bits[axis] === 0 ? axisMeta[axis].lowLabel : axisMeta[axis].highLabel,
+      )
+      .join(' / ')}。`,
+  ]
+}
+
+function buildBarrage(profile) {
+  return [
+    { label: '朋友锐评', text: profile.verdict },
+    { label: '本人嘴上', text: getFirstSentence(profile.description) },
+    { label: '内心实况', text: profile.hiddenPain },
+  ]
+}
+
 export const resultMap = [
   { index: 0, code: 'CTRL', name: '控制怪' },
   { index: 1, code: 'SHIT', name: '嘴臭侠' },
@@ -461,9 +783,14 @@ export const resultMap = [
 
 export const indexedResults = resultMap.map((entry) => {
   const profile = resultProfilesByCode[entry.code]
+  const narrative = resultNarrativesByCode[entry.code]
 
   if (!profile) {
     throw new Error(`Missing profile for result code: ${entry.code}`)
+  }
+
+  if (!narrative) {
+    throw new Error(`Missing narrative for result code: ${entry.code}`)
   }
 
   if (profile.name !== entry.name) {
@@ -473,6 +800,14 @@ export const indexedResults = resultMap.map((entry) => {
   return {
     ...profile,
     index: entry.index,
+    verdict: narrative.verdict,
+    hiddenPain: narrative.hiddenPain,
+    strengths: buildStrengths(entry.index),
+    barrage: buildBarrage({
+      ...profile,
+      verdict: narrative.verdict,
+      hiddenPain: narrative.hiddenPain,
+    }),
   }
 })
 

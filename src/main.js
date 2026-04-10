@@ -43,7 +43,18 @@ function getFilteredResults() {
   }
 
   return indexedResults.filter((result) =>
-    [result.code, result.name, result.description].join(' ').toLowerCase().includes(keyword),
+    [
+      result.code,
+      result.name,
+      result.verdict,
+      result.description,
+      result.hiddenPain,
+      ...result.strengths,
+      ...result.barrage.map((item) => item.text),
+    ]
+      .join(' ')
+      .toLowerCase()
+      .includes(keyword),
   )
 }
 
@@ -61,7 +72,7 @@ function getRelatedResults(index) {
 }
 
 function getShareText(result) {
-  return `我测出来是 ${result.code}｜${result.name}\n${result.description}\n#MoodAtlas`
+  return `我测出来是 ${result.code}｜${result.name}\n一句话：${result.verdict}\n吐槽：${result.description}\n#MoodAtlas`
 }
 
 function resetCopyStateSoon() {
@@ -187,6 +198,7 @@ function renderResultCard(result, activeCode = '') {
         <span class="result-index">#${String(result.index).padStart(2, '0')}</span>
       </div>
       <h3 class="result-name">${escapeHtml(result.name)}</h3>
+      <p class="result-verdict">${escapeHtml(result.verdict)}</p>
       <p class="result-description">${escapeHtml(result.description)}</p>
     </button>
   `
@@ -239,10 +251,15 @@ function renderHomeScreen() {
             <p class="mini-label">结果预览</p>
             <span class="code-badge">${escapeHtml(preview.code)}</span>
             <h2>${escapeHtml(preview.name)}</h2>
+            <p class="preview-verdict">${escapeHtml(preview.verdict)}</p>
             <p class="preview-body">${escapeHtml(preview.description)}</p>
-            <p class="preview-tip">
-              现在这里是预览卡。正式测试完成后，会进入完整结果页并给出该人格的最终结论。
-            </p>
+            <div class="preview-points">
+              ${preview.strengths
+                .slice(0, 2)
+                .map((item) => `<span class="preview-chip">${escapeHtml(item)}</span>`)
+                .join('')}
+            </div>
+            <p class="preview-tip">隐藏痛点：${escapeHtml(preview.hiddenPain)}</p>
           </div>
         </aside>
       </section>
@@ -442,6 +459,7 @@ function renderResultScreen() {
             <span class="status-pill">#${String(index).padStart(2, '0')} / 63</span>
           </div>
           <h1>${escapeHtml(result.name)}</h1>
+          <p class="result-verdict hero-verdict">${escapeHtml(result.verdict)}</p>
           <p class="lede">${escapeHtml(result.description)}</p>
 
           <div class="stat-row">
@@ -480,6 +498,63 @@ function renderResultScreen() {
             <pre class="share-copy">${escapeHtml(getShareText(result))}</pre>
           </div>
         </aside>
+      </section>
+
+      <section class="result-content-panel">
+        <div class="section-heading">
+          <p class="eyebrow">Result Copy</p>
+          <h2>这次结果不只给你一个名字</h2>
+          <p class="section-copy">
+            这部分是用户真正会读完、会截图、会转发的内容。现在每个结果都已经补成统一格式。
+          </p>
+        </div>
+
+        <div class="result-copy-grid">
+          <article class="copy-card copy-card-wide">
+            <p class="mini-label">一句话结论</p>
+            <h3>${escapeHtml(result.verdict)}</h3>
+          </article>
+
+          <article class="copy-card">
+            <p class="mini-label">吐槽描述</p>
+            <p class="copy-body">${escapeHtml(result.description)}</p>
+          </article>
+
+          <article class="copy-card">
+            <p class="mini-label">隐藏痛点</p>
+            <p class="copy-body">${escapeHtml(result.hiddenPain)}</p>
+          </article>
+
+          <article class="copy-card copy-card-wide">
+            <p class="mini-label">优点</p>
+            <ul class="copy-list">
+              ${result.strengths.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="mechanics-panel">
+        <div class="section-heading">
+          <p class="eyebrow">Hot Comments</p>
+          <h2>属于你的高频弹幕</h2>
+          <p class="section-copy">
+            很多人看结果页，真正会记住的其实就是这几句。它们现在会跟着每个结果一起切换。
+          </p>
+        </div>
+
+        <div class="barrage-grid">
+          ${result.barrage
+            .map(
+              (item) => `
+                <article class="barrage-card">
+                  <p class="mini-label">${escapeHtml(item.label)}</p>
+                  <p class="copy-body">${escapeHtml(item.text)}</p>
+                </article>
+              `,
+            )
+            .join('')}
+        </div>
       </section>
 
       <details class="details-panel">
@@ -536,7 +611,7 @@ function renderResultScreen() {
                 >
                   <span class="mechanic-step">${escapeHtml(neighbor.code)}</span>
                   <h3>${escapeHtml(neighbor.name)}</h3>
-                  <p>${escapeHtml(neighbor.description)}</p>
+                  <p>${escapeHtml(neighbor.verdict)}</p>
                 </button>
               `,
             )

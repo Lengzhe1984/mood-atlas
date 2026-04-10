@@ -117,6 +117,7 @@ button {
 .hero-panel,
 .mechanics-panel,
 .library-panel,
+.result-content-panel,
 .result-hero,
 .quiz-card,
 .palette-card,
@@ -220,6 +221,7 @@ button {
 .hero-panel,
 .mechanics-panel,
 .library-panel,
+.result-content-panel,
 .result-hero,
 .quiz-card,
 .palette-card,
@@ -407,6 +409,19 @@ h1 {
     linear-gradient(180deg, rgba(255, 252, 247, 0.95) 0%, rgba(255, 246, 239, 0.9) 100%);
 }
 
+.preview-verdict,
+.result-verdict {
+  font-family: var(--heading-font);
+  font-size: 1.24rem;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.hero-verdict {
+  font-size: 1.35rem;
+  max-width: 26ch;
+}
+
 .code-badge {
   width: fit-content;
   padding: 0.6rem 0.94rem;
@@ -425,6 +440,22 @@ h1 {
   font-size: 1.08rem;
 }
 
+.preview-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.preview-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.5rem 0.78rem;
+  font-size: 0.84rem;
+  background: rgba(31, 117, 105, 0.08);
+  color: var(--teal);
+}
+
 .preview-tip {
   margin-top: auto;
   padding-top: 12px;
@@ -433,7 +464,8 @@ h1 {
 }
 
 .mechanics-panel,
-.library-panel {
+.library-panel,
+.result-content-panel {
   padding: 32px;
 }
 
@@ -548,6 +580,15 @@ h1 {
 .result-name {
   font-size: 1.42rem;
   line-height: 1.05;
+}
+
+.result-verdict {
+  margin: 0;
+}
+
+.result-card .result-verdict {
+  font-size: 1rem;
+  line-height: 1.45;
 }
 
 .empty-state {
@@ -718,6 +759,53 @@ h1 {
   line-height: 1.6;
 }
 
+.result-copy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.copy-card,
+.barrage-card {
+  border-radius: 24px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  background: rgba(255, 251, 246, 0.82);
+  box-shadow: var(--shadow-soft);
+}
+
+.copy-card-wide {
+  grid-column: 1 / -1;
+}
+
+.copy-card h3 {
+  margin-top: 8px;
+  font-size: 1.7rem;
+  line-height: 1.15;
+}
+
+.copy-body {
+  margin: 8px 0 0;
+  color: var(--ink-soft);
+  font-size: 1rem;
+}
+
+.copy-list {
+  margin: 12px 0 0;
+  padding-left: 1.15rem;
+  color: var(--ink-soft);
+}
+
+.copy-list li + li {
+  margin-top: 8px;
+}
+
+.barrage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
 .details-panel {
   padding: 0;
 }
@@ -794,7 +882,8 @@ h1 {
 
   .mechanics-grid,
   .results-grid,
-  .details-grid {
+  .details-grid,
+  .barrage-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -814,6 +903,7 @@ h1 {
   .hero-panel,
   .mechanics-panel,
   .library-panel,
+  .result-content-panel,
   .result-hero,
   .quiz-card,
   .palette-card,
@@ -825,7 +915,9 @@ h1 {
   .stat-row,
   .mechanics-grid,
   .results-grid,
-  .details-grid {
+  .details-grid,
+  .barrage-grid,
+  .result-copy-grid {
     grid-template-columns: 1fr;
   }
 
