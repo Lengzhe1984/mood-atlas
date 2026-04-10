@@ -7,6 +7,11 @@ import { getAnsweredCount, getFinalResult, isQuizComplete } from './scoring.js'
 const app = document.querySelector('#app')
 
 const answerLabelByValue = Object.fromEntries(answerOptions.map((option) => [option.value, option.label]))
+const quizHelperTips = [
+  '选最像你的直觉，不需要想标准答案。',
+  '每题都用 1 到 5 分量表，后台会自动处理正反向记分。',
+  '如果你中途停下，再回来时这一页还能继续补答。',
+]
 
 const state = {
   view: 'home',
@@ -325,15 +330,17 @@ function renderAxisSection(section) {
 function renderQuizScreen() {
   const answeredCount = getAnsweredCount(state.answers)
   const progress = Math.round((answeredCount / totalQuestions) * 100)
+  const updateSummary = appMeta.latestUpdatePoints.join(' ')
 
   return `
     <main class="layout quiz-layout">
       <section class="quiz-main">
         <article class="quiz-intro-card">
           <div class="progress-header">
-            <div>
-              <p class="eyebrow">Beta Quiz Flow</p>
-              <h1 class="question-title">这版改成整页答题，尽量少翻页。</h1>
+            <div class="quiz-intro-copy">
+              <p class="eyebrow">答题提示</p>
+              <h1 class="question-title">按直觉作答，整页一次填完。</h1>
+              <p class="section-copy">不用先想标准答案，做完就能直接算结果。</p>
             </div>
             <div class="progress-stack">
               <div class="progress-track" aria-hidden="true">
@@ -342,11 +349,20 @@ function renderQuizScreen() {
               <p class="progress-copy">已作答 ${answeredCount} / ${totalQuestions} 题。做完就能直接算结果。</p>
             </div>
           </div>
+
+          <ul class="helper-list helper-list-inline">
+            ${quizHelperTips.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}
+          </ul>
         </article>
 
         <div class="axis-section-stack">
           ${axisSections.map((section) => renderAxisSection(section)).join('')}
         </div>
+
+        <article class="quiz-update-note">
+          <p class="mini-label">Latest Update · v${escapeHtml(appMeta.version)}</p>
+          <p class="quiz-update-copy">${escapeHtml(appMeta.latestUpdateTitle)}。${escapeHtml(updateSummary)}</p>
+        </article>
       </section>
 
       <aside class="quiz-sidebar">
@@ -384,15 +400,6 @@ function renderQuizScreen() {
               回到首页
             </button>
           </div>
-        </article>
-
-        <article class="palette-card">
-          <p class="mini-label">答题提示</p>
-          <ul class="helper-list">
-            <li>选最像你的直觉，不需要想标准答案。</li>
-            <li>每题都用 1 到 5 分量表，后台会自动处理正反向记分。</li>
-            <li>如果你中途停下，再回来时这一页还能继续补答。</li>
-          </ul>
         </article>
       </aside>
     </main>

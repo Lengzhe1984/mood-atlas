@@ -691,6 +691,11 @@ h1 {
   gap: 18px;
 }
 
+.quiz-intro-copy {
+  display: grid;
+  gap: 10px;
+}
+
 .progress-stack {
   display: grid;
   gap: 10px;
@@ -900,8 +905,35 @@ h1 {
   padding-left: 1.1rem;
 }
 
+.helper-list-inline {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+  padding-left: 1.1rem;
+}
+
+.helper-list-inline li {
+  padding-right: 10px;
+}
+
+.helper-list-inline li + li {
+  margin-top: 0;
+}
+
 .helper-list li + li {
   margin-top: 8px;
+}
+
+.quiz-update-note {
+  padding: 4px 6px 0;
+  color: var(--ink-soft);
+}
+
+.quiz-update-copy {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.7;
 }
 
 .share-copy {
@@ -1050,7 +1082,8 @@ h1 {
   .results-grid,
   .details-grid,
   .barrage-grid,
-  .question-card-grid {
+  .question-card-grid,
+  .helper-list-inline {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1094,7 +1127,8 @@ h1 {
   .barrage-grid,
   .result-copy-grid,
   .question-card-grid,
-  .scale-legend {
+  .scale-legend,
+  .helper-list-inline {
     grid-template-columns: 1fr;
   }
 
@@ -1132,5 +1166,9 @@ h1 {
 
   .answer-button-row {
     grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .quiz-update-note {
+    padding-inline: 2px;
   }
 }
