@@ -417,6 +417,20 @@ h1 {
   color: var(--ink);
 }
 
+.preview-english,
+.result-english,
+.copy-subline {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-english {
+  font-size: 1rem;
+}
+
 .hero-verdict {
   font-size: 1.35rem;
   max-width: 26ch;
@@ -584,6 +598,10 @@ h1 {
 
 .result-verdict {
   margin: 0;
+}
+
+.result-card .result-english {
+  font-size: 0.82rem;
 }
 
 .result-card .result-verdict {

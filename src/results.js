@@ -650,6 +650,80 @@ const resultNarrativesByCode = {
   ),
 }
 
+const resultDisplayByLegacyCode = {
+  OJBK: { code: 'OJBK', englishName: 'Whatever Type', name: '无所谓人' },
+  ATMR: { code: 'ATMR', englishName: 'Overgiver', name: '垫付侠' },
+  SOLO: { code: 'SOLO', englishName: 'Island Soul', name: '孤岛人' },
+  FAKE: { code: 'FAKE', englishName: 'Masked One', name: '伪装人' },
+  LOOP: { code: 'LOOP', englishName: 'Overthink Looper', name: '复盘怪' },
+  EMOO: { code: 'EMOO', englishName: 'Midnight Emo', name: '夜游魂' },
+  ZZZZ: { code: 'ZZZZ', englishName: 'Sleep Mode', name: '装死人' },
+  DEAD: { code: 'DEAD', englishName: 'Low Battery', name: '低电量人' },
+
+  HOLD: { code: 'HOLD', englishName: 'Hard Holder', name: '硬撑王' },
+  COLD: { code: 'COLD', englishName: 'Silent Freezer', name: '冷处理人' },
+  CRYZ: { code: 'CRYZ', englishName: 'Crybaby Core', name: '哭包体' },
+  JOKR: { code: 'JOKR', englishName: 'Coping Joker', name: '段子精' },
+  WILD: { code: 'WILD', englishName: 'Chaos Engine', name: '疯感人' },
+  BOSS: { code: 'BOSS', englishName: 'Control Freak', name: '控场怪' },
+  HEAL: { code: 'HEAL', englishName: 'Bounce-Back Type', name: '回弹人' },
+  GONE: { code: 'GONE', englishName: 'Vanishing Act', name: '蒸发侠' },
+
+  SHIT: { code: 'SHIT', englishName: 'Trash Talker', name: '嘴臭侠' },
+  FINE: { code: 'FINE', englishName: 'Lowkey Pretender', name: '淡写怪' },
+  NOPE: { code: 'NOPE', englishName: 'Hard Pass', name: '拒绝体' },
+  WHYU: { code: 'WHYY', englishName: 'Why Machine', name: '追问怪' },
+  SORRY: { code: 'SORRY', englishName: 'Apology Machine', name: '道歉人' },
+  TIRED: { code: 'TIRED', englishName: 'Tired Soul', name: '疲惫精' },
+  PANIC: { code: 'PANIC', englishName: 'Alarm System', name: '惊慌体' },
+  DRAMA: { code: 'DRAMA', englishName: 'Drama Magnet', name: '戏剧人' },
+
+  NPCX: { code: 'NPC', englishName: 'Background Unit', name: '背景板' },
+  GLOW: { code: 'GLOW', englishName: 'Vibe Generator', name: '氛围精' },
+  CARE: { code: 'CARE', englishName: 'Worry Loader', name: '操心怪' },
+  KIDDO: { code: 'KIDDO', englishName: 'Inner Kid', name: '小孩人' },
+  MONK: { code: 'MONK', englishName: 'Detached One', name: '看破人' },
+  FWORD: { code: 'FWORD', englishName: 'Swear Reactor', name: '爆粗怪' },
+  GLASS: { code: 'GLASS', englishName: 'Fragile Heart', name: '玻璃心' },
+  STUCK: { code: 'STUCK', englishName: 'Frozen Engine', name: '卡住人' },
+
+  CTRL: { code: 'CTRL', englishName: 'Control Panel', name: '控制怪' },
+  AAAB: { code: 'LEDGR', englishName: 'Score Keeper', name: '记账人' },
+  LOVER: { code: 'LOVER', englishName: 'Love Loader', name: '多情种' },
+  EXXX: { code: 'XREC', englishName: 'Ex Cache', name: '前任脑' },
+  MUMM: { code: 'MUMM', englishName: 'Mom Friend', name: '妈妈人' },
+  TANK: { code: 'TANK', englishName: 'Damage Tank', name: '扛把子' },
+  SNEAK: { code: 'FADE', englishName: 'Quiet Exit', name: '偷退人' },
+  BLUNT: { code: 'BLUNT', englishName: 'Straight Shooter', name: '直球怪' },
+
+  MOODY: { code: 'MOODY', englishName: 'Mood Swinger', name: '阴晴怪' },
+  DIZZY: { code: 'DIZZY', englishName: 'Floaty Brain', name: '迷糊体' },
+  CHILL: { code: 'CHILL', englishName: 'Loose Vibes', name: '散漫王' },
+  HURRY: { code: 'HURRY', englishName: 'Rush Mode', name: '急急国王' },
+  DODGE: { code: 'DODGE', englishName: 'Escape Artist', name: '闪避怪' },
+  SWEET: { code: 'SWEET', englishName: 'Soft Candy', name: '软糖人' },
+  RUDEY: { code: 'RUDEY', englishName: 'Mean Cutie', name: '欠揍人' },
+  NERDY: { code: 'NERDY', englishName: 'Twisted Thinker', name: '拧巴精' },
+
+  YAYAY: { code: 'YAYAY', englishName: 'Hype Rocket', name: '上头怪' },
+  BROKE: { code: 'BROKE', englishName: 'Cracked Soul', name: '碎掉人' },
+  SMILE: { code: 'SMILE', englishName: 'Smile Mask', name: '假笑怪' },
+  BUBU: { code: 'BUBU', englishName: 'Scenario Builder', name: '脑补王' },
+  GUILT: { code: 'GUILT', englishName: 'Guilt Carrier', name: '内疚体' },
+  PUSHY: { code: 'PUSHY', englishName: 'Momentum Pusher', name: '推进器' },
+  SPOIL: { code: 'SPOIL', englishName: 'Soft Spotter', name: '纵容怪' },
+  RISKY: { code: 'RISKY', englishName: 'Gamble Brain', name: '冒险派' },
+
+  WORTH: { code: 'WORTH', englishName: 'Cost Checker', name: '值吗人' },
+  DONTA: { code: 'MUTE', englishName: 'Do Not Disturb', name: '别烦我' },
+  ICYBB: { code: 'SHELL', englishName: 'Icy Shell', name: '冰壳心' },
+  CLING: { code: 'CLING', englishName: 'Velcro Heart', name: '黏人怪' },
+  HAHAA: { code: 'HAHA', englishName: 'Laugh Buffer', name: '哈哈人' },
+  SAVER: { code: 'SAVER', englishName: 'Firefighter Friend', name: '救火队' },
+  GREYY: { code: 'GREYY', englishName: 'Soft Blur', name: '灰度人' },
+  ALIVE: { code: 'ALIVE', englishName: 'Comes-Back Type', name: '回春人' },
+}
+
 const axisOrder = ['A', 'B', 'C', 'D', 'E', 'F']
 
 const axisPairStrengths = {
@@ -707,7 +781,7 @@ function buildBarrage(profile) {
   ]
 }
 
-export const resultMap = [
+const legacyResultMap = [
   { index: 0, code: 'CTRL', name: '控制怪' },
   { index: 1, code: 'SHIT', name: '嘴臭侠' },
   { index: 2, code: 'AAAB', name: '算账人' },
@@ -781,30 +855,43 @@ export const resultMap = [
   { index: 63, code: 'DEAD', name: '低电量人' },
 ]
 
-export const indexedResults = resultMap.map((entry) => {
-  const profile = resultProfilesByCode[entry.code]
-  const narrative = resultNarrativesByCode[entry.code]
+export const resultMap = legacyResultMap.map((entry) => ({
+  index: entry.index,
+  ...resultDisplayByLegacyCode[entry.code],
+}))
+
+export const indexedResults = legacyResultMap.map((entry) => {
+  const legacyCode = entry.code
+  const profile = resultProfilesByCode[legacyCode]
+  const narrative = resultNarrativesByCode[legacyCode]
+  const display = resultDisplayByLegacyCode[legacyCode]
 
   if (!profile) {
-    throw new Error(`Missing profile for result code: ${entry.code}`)
+    throw new Error(`Missing profile for result code: ${legacyCode}`)
   }
 
   if (!narrative) {
-    throw new Error(`Missing narrative for result code: ${entry.code}`)
+    throw new Error(`Missing narrative for result code: ${legacyCode}`)
   }
 
-  if (profile.name !== entry.name) {
-    throw new Error(`Result name mismatch for ${entry.code}: ${profile.name} !== ${entry.name}`)
+  if (!display) {
+    throw new Error(`Missing display metadata for result code: ${legacyCode}`)
   }
 
   return {
-    ...profile,
+    code: display.code,
+    englishName: display.englishName,
+    name: display.name,
+    description: profile.description,
     index: entry.index,
     verdict: narrative.verdict,
     hiddenPain: narrative.hiddenPain,
     strengths: buildStrengths(entry.index),
     barrage: buildBarrage({
-      ...profile,
+      code: display.code,
+      englishName: display.englishName,
+      name: display.name,
+      description: profile.description,
       verdict: narrative.verdict,
       hiddenPain: narrative.hiddenPain,
     }),

@@ -45,6 +45,7 @@ function getFilteredResults() {
   return indexedResults.filter((result) =>
     [
       result.code,
+      result.englishName,
       result.name,
       result.verdict,
       result.description,
@@ -72,7 +73,7 @@ function getRelatedResults(index) {
 }
 
 function getShareText(result) {
-  return `我测出来是 ${result.code}｜${result.name}\n一句话：${result.verdict}\n吐槽：${result.description}\n#MoodAtlas`
+  return `我测出来是 ${result.code}｜${result.englishName}｜${result.name}\n一句话：${result.verdict}\n吐槽：${result.description}\n#MoodAtlas`
 }
 
 function resetCopyStateSoon() {
@@ -198,6 +199,7 @@ function renderResultCard(result, activeCode = '') {
         <span class="result-index">#${String(result.index).padStart(2, '0')}</span>
       </div>
       <h3 class="result-name">${escapeHtml(result.name)}</h3>
+      <p class="result-english">${escapeHtml(result.englishName)}</p>
       <p class="result-verdict">${escapeHtml(result.verdict)}</p>
       <p class="result-description">${escapeHtml(result.description)}</p>
     </button>
@@ -251,6 +253,7 @@ function renderHomeScreen() {
             <p class="mini-label">结果预览</p>
             <span class="code-badge">${escapeHtml(preview.code)}</span>
             <h2>${escapeHtml(preview.name)}</h2>
+            <p class="preview-english">${escapeHtml(preview.englishName)}</p>
             <p class="preview-verdict">${escapeHtml(preview.verdict)}</p>
             <p class="preview-body">${escapeHtml(preview.description)}</p>
             <div class="preview-points">
@@ -459,6 +462,7 @@ function renderResultScreen() {
             <span class="status-pill">#${String(index).padStart(2, '0')} / 63</span>
           </div>
           <h1>${escapeHtml(result.name)}</h1>
+          <p class="result-english hero-english">${escapeHtml(result.englishName)}</p>
           <p class="result-verdict hero-verdict">${escapeHtml(result.verdict)}</p>
           <p class="lede">${escapeHtml(result.description)}</p>
 
@@ -513,6 +517,7 @@ function renderResultScreen() {
           <article class="copy-card copy-card-wide">
             <p class="mini-label">一句话结论</p>
             <h3>${escapeHtml(result.verdict)}</h3>
+            <p class="copy-subline">${escapeHtml(result.code)} / ${escapeHtml(result.englishName)} / ${escapeHtml(result.name)}</p>
           </article>
 
           <article class="copy-card">
