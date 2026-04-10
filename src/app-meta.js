@@ -1,15 +1,22 @@
 export const appMeta = {
   stage: 'Beta',
-  version: '0.1.0-beta.8',
+  version: '0.1.0-beta.9',
   repoUrl: 'https://github.com/Lengzhe1984/mood-atlas',
   siteUrl: 'https://lengzhe1984.github.io/mood-atlas/',
-  latestUpdateTitle: '64 种结果文案换成新版五段式',
+  latestUpdateTitle: '48 题题库升级到终稿',
   latestUpdatePoints: [
-    '64 种性格结果统一替换成新版评价文案，整体语气更完整也更像朋友在讲你。',
-    '结果页栏目改成一句话结论、朋友式吐槽、为什么会这样、可爱的地方、提醒。',
-    '首页预览和分享文案也同步使用新字段，不再混用旧版标题。',
+    '48 道题全部替换成终稿长文案，语气和细节都比之前更完整。',
+    '量表选项文案同步更新为“这题别太懂我 / 像，真的像 / 有一点 / 不太像 / 你说的是别人吧”。',
+    '6 个维度标题和两端标签也换成新版表述，答题页前后台文案终于统一。',
   ],
   recentUpdates: [
+    {
+      version: '0.1.0-beta.9',
+      notes: [
+        '48 题题库整体替换成终稿长文案。',
+        '量表选项和 6 个维度标题同步更新。',
+      ],
+    },
     {
       version: '0.1.0-beta.8',
       notes: [
@@ -22,13 +29,6 @@ export const appMeta = {
       notes: [
         '首页更新区改成更紧凑的版本日志，不再使用大卡片。',
         '只保留最近 3 次更新内容，改成 README 风格的文字说明。',
-      ],
-    },
-    {
-      version: '0.1.0-beta.6',
-      notes: [
-        '手机端答题页顶部不再显示 Beta Quiz Flow。',
-        '答题提示提前到最上方，更新说明改到答题页底部小字展示。',
       ],
     },
   ],
