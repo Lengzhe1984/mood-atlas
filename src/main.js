@@ -33,6 +33,18 @@ function escapeHtml(value) {
     .replaceAll("'", '&#39;')
 }
 
+function compactText(value, maxLength = 28) {
+  const normalized = String(value).replace(/\s+/g, ' ').trim()
+  const sentence = normalized.split(/[。！？]/)[0]?.trim() ?? ''
+  const candidate = sentence || normalized
+
+  return candidate.length > maxLength ? `${candidate.slice(0, maxLength).trim()}…` : candidate
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max)
+}
+
 function getPreviewResult() {
   return indexedResults.find((result) => result.code === state.previewCode) ?? indexedResults[0]
 }
@@ -169,24 +181,55 @@ function renderScaleLegend() {
   `
 }
 
-function renderCharacterCard(result, variant = 'result') {
+function getResultConfidence(axisBreakdown) {
+  const averageDistance =
+    axisBreakdown.reduce((total, item) => total + clamp(Math.abs(item.score - 24) / 16, 0, 1), 0) / axisBreakdown.length
+
+  return Math.round(68 + averageDistance * 28)
+}
+
+function getStrongAxisCount(axisBreakdown) {
+  return axisBreakdown.filter((item) => Math.abs(item.score - 24) >= 5).length
+}
+
+function renderPortraitPosterCard(result, options = {}) {
+  const { variant = 'result', lead = '你的人格类型是：', footerText = result.friendRoast } = options
   const art = getCharacterArt(result.code, result.name)
-  const sizeClass = variant === 'home' ? 'pixel-portrait-home' : 'pixel-portrait-result'
+  const imageClass = variant === 'home' ? 'portrait-illustration-home' : 'portrait-illustration-result'
 
   return `
-    <article class="character-card">
-      <p class="mini-label">Pixel Character</p>
-      <div class="pixel-stage">
-        <img class="pixel-portrait ${sizeClass}" src="${art.src}" alt="${escapeHtml(art.alt)}" />
+    <article
+      class="reference-card portrait-card portrait-card-${variant}"
+      style="--portrait-accent:${escapeHtml(art.theme.accent)}; --portrait-soft:${escapeHtml(art.theme.soft)}; --portrait-deep:${escapeHtml(art.theme.deep)};"
+    >
+      <p class="portrait-lead">${escapeHtml(lead)}</p>
+      <h2 class="portrait-code">${escapeHtml(result.code)}</h2>
+      <p class="portrait-tagline">${escapeHtml(result.verdict)}</p>
+      <div class="portrait-frame">
+        <img class="portrait-illustration ${imageClass}" src="${art.src}" alt="${escapeHtml(art.alt)}" />
       </div>
-      <p class="pixel-caption">${escapeHtml(art.caption)}</p>
+      <p class="portrait-footer">${escapeHtml(compactText(footerText, variant === 'home' ? 20 : 28))}</p>
+    </article>
+  `
+}
+
+function renderTypeSummaryCard(result, options = {}) {
+  const { kicker = '你的主类型', pill = '', body = '', note = '', variant = 'result' } = options
+
+  return `
+    <article class="reference-card summary-card summary-card-${variant}">
+      <p class="mini-label">${escapeHtml(kicker)}</p>
+      <h3>${escapeHtml(result.name)}（${escapeHtml(result.code)}）</h3>
+      <p class="summary-english">${escapeHtml(result.englishName)}</p>
+      ${pill ? `<div class="summary-pill-row"><span class="summary-pill">${escapeHtml(pill)}</span></div>` : ''}
+      ${body ? `<p class="summary-body">${escapeHtml(body)}</p>` : ''}
+      ${note ? `<p class="summary-note">${escapeHtml(note)}</p>` : ''}
     </article>
   `
 }
 
 function renderHomeScreen() {
   const preview = getPreviewResult()
-  const previewArt = getCharacterArt(preview.code, preview.name)
 
   return `
     <main class="layout">
@@ -195,7 +238,7 @@ function renderHomeScreen() {
           <p class="eyebrow">Beta v${escapeHtml(appMeta.version)}</p>
           <h1>前台像梗图人格宇宙，后台其实是六维模型。</h1>
           <p class="lede">
-            这版已经把 48 道题、6 个隐藏维度和 64 个结果映射全部接进来了，现在还给每一型都配上了像素风角色造型。答题页继续维持更适合手机和桌面的单页式结构，尽量少翻页、少遮挡、少打断。
+            这版已经把 48 道题、6 个隐藏维度和 64 个结果映射全部接进来了，现在还把结果卡改成了更接近人格海报的插画版。答题页继续维持更适合手机和桌面的单页式结构，尽量少翻页、少遮挡、少打断。
           </p>
 
           <div class="stat-row">
@@ -219,36 +262,21 @@ function renderHomeScreen() {
           </div>
 
           <div class="chip-row">
-            ${['像素人物卡', '单页答题', '移动端优化', '中英双名']
+            ${['结果海报卡', '几何头像', '移动端优化', '中英双名']
               .map((item) => `<span class="result-chip">${escapeHtml(item)}</span>`)
               .join('')}
           </div>
         </div>
 
-        <aside class="preview-panel">
-          <div class="preview-card">
-            <p class="mini-label">结果预览</p>
-            <div class="preview-art-wrap">
-              <div class="pixel-stage pixel-stage-compact">
-                <img
-                  class="pixel-portrait pixel-portrait-home"
-                  src="${previewArt.src}"
-                  alt="${escapeHtml(previewArt.alt)}"
-                />
-              </div>
-              <p class="pixel-caption">${escapeHtml(previewArt.caption)}</p>
-            </div>
-            <span class="code-badge">${escapeHtml(preview.code)}</span>
-            <h2>${escapeHtml(preview.name)}</h2>
-            <p class="preview-english">${escapeHtml(preview.englishName)}</p>
-            <p class="preview-verdict">${escapeHtml(preview.verdict)}</p>
-            <p class="preview-body">${escapeHtml(preview.friendRoast)}</p>
-            <div class="preview-points">
-              <span class="preview-chip">可爱的地方</span>
-            </div>
-            <p class="preview-note">${escapeHtml(preview.charm)}</p>
-            <p class="preview-tip">给你的提醒：${escapeHtml(preview.reminder)}</p>
-          </div>
+        <aside class="preview-panel preview-panel-reference">
+          ${renderPortraitPosterCard(preview, { variant: 'home', lead: '随机预览这一型：', footerText: preview.friendRoast })}
+          ${renderTypeSummaryCard(preview, {
+            variant: 'home',
+            kicker: '这型预览',
+            pill: '随机预览 · 64 型之一',
+            body: preview.charm,
+            note: `给你的提醒：${preview.reminder}`,
+          })}
         </aside>
       </section>
 
@@ -424,6 +452,8 @@ function renderQuizScreen() {
 function renderResultScreen() {
   const { axisBreakdown, binaryIndex, index, result } = getFinalResult(state.answers)
   const relatedResults = getRelatedResults(index)
+  const confidence = getResultConfidence(axisBreakdown)
+  const strongAxes = getStrongAxisCount(axisBreakdown)
 
   return `
     <main class="layout result-layout">
@@ -469,20 +499,23 @@ function renderResultScreen() {
           </div>
         </div>
 
-        <aside class="preview-panel">
-          ${renderCharacterCard(result, 'result')}
-          <div class="share-card">
-            <p class="mini-label">分享文案预览</p>
-            <pre class="share-copy">${escapeHtml(getShareText(result))}</pre>
-          </div>
+        <aside class="preview-panel preview-panel-reference">
+          ${renderPortraitPosterCard(result, { variant: 'result', lead: '你的人格类型是：', footerText: result.friendRoast })}
+          ${renderTypeSummaryCard(result, {
+            variant: 'result',
+            kicker: '你的主类型',
+            pill: `匹配感 ${confidence}% · ${strongAxes}/6 轴更明确`,
+            body: result.why,
+            note: `维度命中度比较稳定，这一型可以先看作你当前最像的一张人格截图。隐藏索引是 ${binaryIndex}（#${index}）。`,
+          })}
         </aside>
       </section>
 
       <section class="result-content-panel">
         <div class="section-heading">
           <p class="eyebrow">Result Copy</p>
-          <h2>这次结果页换成新版五段式文案</h2>
-          <p class="section-copy">从一句话结论到提醒，整页内容都换成了更像朋友在认真点评你的版本。</p>
+          <h2>结果文案还是五段式，但卡面更像一张人格海报</h2>
+          <p class="section-copy">上面先看新的结果卡和主类型摘要，下面继续看完整的朋友式点评。</p>
         </div>
 
         <div class="result-copy-grid">
@@ -510,6 +543,11 @@ function renderResultScreen() {
           <article class="copy-card copy-card-wide">
             <p class="mini-label">给你的提醒</p>
             <p class="copy-body">${escapeHtml(result.reminder)}</p>
+          </article>
+
+          <article class="copy-card copy-card-wide share-preview-card">
+            <p class="mini-label">分享文案预览</p>
+            <pre class="share-copy">${escapeHtml(getShareText(result))}</pre>
           </article>
         </div>
       </section>

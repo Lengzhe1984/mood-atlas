@@ -1,15 +1,22 @@
 export const appMeta = {
   stage: 'Beta',
-  version: '0.1.0-beta.10',
+  version: '0.1.0-beta.11',
   repoUrl: 'https://github.com/Lengzhe1984/mood-atlas',
   siteUrl: 'https://lengzhe1984.github.io/mood-atlas/',
-  latestUpdateTitle: '64 个性格接入像素风角色造型',
+  latestUpdateTitle: '结果卡改成参考图式的插画海报布局',
   latestUpdatePoints: [
-    '新增程序生成的像素风人物造型，每个结果 code 都会稳定对应到一套角色外观。',
-    '首页结果预览和结果页都接入了人物卡，不用单独做图也能先形成完整气质。',
-    '角色样式由服装、姿态、配色和象征元素组成，后面继续细化时也更好维护。',
+    '人物造型从像素块改成了更接近参考图的几何切面头像，观感更像一张人格海报。',
+    '首页预览区和结果页侧栏都换成上下两张卡的结构，上卡看类型海报，下卡看主类型说明。',
+    '结果摘要里补了匹配感和轴向明确度，让视觉参考图的结构在当前模型里也能成立。',
   ],
   recentUpdates: [
+    {
+      version: '0.1.0-beta.11',
+      notes: [
+        '结果卡改成参考图式的插画海报布局。',
+        '人物造型从像素风切到几何切面头像。',
+      ],
+    },
     {
       version: '0.1.0-beta.10',
       notes: [
@@ -22,13 +29,6 @@ export const appMeta = {
       notes: [
         '48 题题库整体替换成终稿长文案。',
         '量表选项和 6 个维度标题同步更新。',
-      ],
-    },
-    {
-      version: '0.1.0-beta.8',
-      notes: [
-        '64 种结果文案整体改成新版五段式评价。',
-        '结果页、首页预览、复制分享文案同步切到新字段。',
       ],
     },
   ],

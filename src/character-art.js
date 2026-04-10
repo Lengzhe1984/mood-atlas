@@ -1,45 +1,56 @@
-const CELL = 4
-const VIEWBOX = 96
+const VIEWBOX = 320
 
-const skinTones = ['#f2cfb6', '#e4b18a', '#c98a62', '#8f5e45']
-const hairColors = ['#2f241f', '#4b3a30', '#6a4b3a', '#857b74', '#603d54', '#4d6074', '#6f6b44', '#25384a']
-const outfitPalettes = [
-  { base: '#c56743', accent: '#f1c6a9', dark: '#7c4028' },
-  { base: '#607c70', accent: '#b6d2c3', dark: '#33463f' },
-  { base: '#4c6689', accent: '#b8cbe2', dark: '#293b57' },
-  { base: '#84608a', accent: '#d8c2db', dark: '#523b59' },
-  { base: '#a46e4b', accent: '#e5ccb3', dark: '#64422b' },
-  { base: '#53626d', accent: '#c5d0d7', dark: '#334049' },
-  { base: '#8e5056', accent: '#efc3c7', dark: '#5a3035' },
-  { base: '#7a7247', accent: '#dfd7a6', dark: '#4b472e' },
+const skinPalettes = [
+  { base: '#f1d7c7', light: '#f8e7db', shadow: '#dcb9a9', deep: '#c69784' },
+  { base: '#e6c2a5', light: '#f0d3bb', shadow: '#c89b7e', deep: '#a57356' },
+  { base: '#c89571', light: '#ddb08f', shadow: '#a77150', deep: '#83543a' },
+  { base: '#8d6348', light: '#ac7d60', shadow: '#6f4a34', deep: '#593926' },
 ]
+
+const hairPalettes = [
+  { base: '#5d5b43', shadow: '#403f2f', highlight: '#8a8867' },
+  { base: '#38312c', shadow: '#231d1a', highlight: '#5a4e47' },
+  { base: '#7a6a58', shadow: '#55473c', highlight: '#9b8f80' },
+  { base: '#5a465f', shadow: '#382d3b', highlight: '#7d6582' },
+  { base: '#496273', shadow: '#2f4350', highlight: '#69879a' },
+  { base: '#7a7d52', shadow: '#585a3a', highlight: '#a0a46f' },
+]
+
+const outfitPalettes = [
+  { base: '#1d2027', light: '#424754', shadow: '#0f1116' },
+  { base: '#40566d', light: '#667f98', shadow: '#22313f' },
+  { base: '#6d7a86', light: '#98a7b2', shadow: '#4d5964' },
+  { base: '#6d5a4b', light: '#9a816c', shadow: '#473a30' },
+  { base: '#4d674f', light: '#7a947b', shadow: '#304131' },
+  { base: '#6d4e59', light: '#9b7280', shadow: '#4a343c' },
+]
+
 const backgroundPalettes = [
-  { outer: '#fff4ea', inner: '#f7e4d3', dot: '#e9c1a5' },
-  { outer: '#eef8f2', inner: '#dceee3', dot: '#a9d2b9' },
-  { outer: '#eef3fb', inner: '#d7e4f4', dot: '#adc4e2' },
-  { outer: '#f6eef9', inner: '#e5d8f0', dot: '#c8afd9' },
-  { outer: '#fff6e8', inner: '#f1e2c4', dot: '#dbbf82' },
-  { outer: '#f3f2ef', inner: '#e0ddd5', dot: '#bfb9ab' },
+  { accent: '#dfe8d7', soft: '#f3f7ef', deep: '#73906c', halo: '#e9f0e3', mist: '#d0dcc7' },
+  { accent: '#d8e1ea', soft: '#eff4f9', deep: '#6c8397', halo: '#e5edf5', mist: '#ced9e4' },
+  { accent: '#eadfd6', soft: '#faf4ee', deep: '#9a7a68', halo: '#f1e6dc', mist: '#decdbf' },
+  { accent: '#e5dde9', soft: '#f6f1f9', deep: '#8b7494', halo: '#ede5f2', mist: '#d9cce1' },
+  { accent: '#e4e8d8', soft: '#f7f9ef', deep: '#7f8c60', halo: '#eef2df', mist: '#d8debf' },
 ]
 
 const familyStyles = {
-  lowkey: { symbol: 'ellipsis', pose: 'slouch', outfit: 'hoodie', expression: 'half', hairStyle: 'messy', accessory: 'none' },
-  giver: { symbol: 'heart', pose: 'open', outfit: 'cardigan', expression: 'soft', hairStyle: 'bob', accessory: 'blush' },
-  guarded: { symbol: 'shell', pose: 'guarded', outfit: 'coat', expression: 'flat', hairStyle: 'long', accessory: 'scarf' },
-  overthink: { symbol: 'spiral', pose: 'upright', outfit: 'sweater', expression: 'sharp', hairStyle: 'side', accessory: 'glasses' },
-  night: { symbol: 'moon', pose: 'slouch', outfit: 'hoodie', expression: 'tired', hairStyle: 'wave', accessory: 'clip' },
-  lowBattery: { symbol: 'battery', pose: 'slouch', outfit: 'hoodie', expression: 'tired', hairStyle: 'crop', accessory: 'bandage' },
-  resilient: { symbol: 'sprout', pose: 'open', outfit: 'jacket', expression: 'smile', hairStyle: 'short', accessory: 'bandage' },
-  heavy: { symbol: 'shield', pose: 'upright', outfit: 'coat', expression: 'flat', hairStyle: 'crop', accessory: 'none' },
-  loud: { symbol: 'spark', pose: 'lean', outfit: 'tee', expression: 'wide', hairStyle: 'spike', accessory: 'blush' },
-  driver: { symbol: 'crown', pose: 'upright', outfit: 'blazer', expression: 'sharp', hairStyle: 'side', accessory: 'ear' },
-  boundary: { symbol: 'stop', pose: 'guarded', outfit: 'jacket', expression: 'flat', hairStyle: 'bun', accessory: 'glasses' },
-  direct: { symbol: 'arrow', pose: 'lean', outfit: 'jacket', expression: 'smirk', hairStyle: 'crop', accessory: 'brow' },
-  heart: { symbol: 'rose', pose: 'open', outfit: 'sweater', expression: 'soft', hairStyle: 'wave', accessory: 'clip' },
-  spirit: { symbol: 'lotus', pose: 'calm', outfit: 'robe', expression: 'closed', hairStyle: 'bun', accessory: 'none' },
-  glow: { symbol: 'shine', pose: 'open', outfit: 'vest', expression: 'smile', hairStyle: 'wave', accessory: 'star' },
-  alarm: { symbol: 'siren', pose: 'guarded', outfit: 'hoodie', expression: 'wide', hairStyle: 'messy', accessory: 'sweat' },
-  soft: { symbol: 'droplet', pose: 'open', outfit: 'cardigan', expression: 'soft', hairStyle: 'bob', accessory: 'blush' },
+  lowkey: { faceShape: 'long', hairStyle: 'parted', accessory: 'none', expression: 'flat', bust: 'sweater' },
+  giver: { faceShape: 'soft', hairStyle: 'bob', accessory: 'earring', expression: 'soft', bust: 'cardigan' },
+  guarded: { faceShape: 'square', hairStyle: 'hooded', accessory: 'none', expression: 'flat', bust: 'coat' },
+  overthink: { faceShape: 'narrow', hairStyle: 'parted', accessory: 'glasses', expression: 'tense', bust: 'sweater' },
+  night: { faceShape: 'soft', hairStyle: 'wave', accessory: 'none', expression: 'tired', bust: 'hoodie' },
+  lowBattery: { faceShape: 'square', hairStyle: 'crop', accessory: 'patch', expression: 'tired', bust: 'hoodie' },
+  resilient: { faceShape: 'diamond', hairStyle: 'lift', accessory: 'patch', expression: 'smile', bust: 'jacket' },
+  heavy: { faceShape: 'square', hairStyle: 'crop', accessory: 'none', expression: 'flat', bust: 'coat' },
+  loud: { faceShape: 'diamond', hairStyle: 'spike', accessory: 'none', expression: 'open', bust: 'tee' },
+  driver: { faceShape: 'square', hairStyle: 'slick', accessory: 'earpiece', expression: 'sharp', bust: 'blazer' },
+  boundary: { faceShape: 'square', hairStyle: 'bun', accessory: 'glasses', expression: 'flat', bust: 'jacket' },
+  direct: { faceShape: 'long', hairStyle: 'crop', accessory: 'brow', expression: 'smirk', bust: 'jacket' },
+  heart: { faceShape: 'soft', hairStyle: 'wave', accessory: 'clip', expression: 'soft', bust: 'cardigan' },
+  spirit: { faceShape: 'long', hairStyle: 'bun', accessory: 'none', expression: 'calm', bust: 'robe' },
+  glow: { faceShape: 'soft', hairStyle: 'wave', accessory: 'clip', expression: 'smile', bust: 'vest' },
+  alarm: { faceShape: 'diamond', hairStyle: 'messy', accessory: 'brow', expression: 'open', bust: 'hoodie' },
+  soft: { faceShape: 'soft', hairStyle: 'bob', accessory: 'earring', expression: 'soft', bust: 'cardigan' },
 }
 
 const codeFamilyMap = makeCodeFamilyMap({
@@ -62,47 +73,6 @@ const codeFamilyMap = makeCodeFamilyMap({
   soft: ['SORRY', 'GUILT', 'SMILE'],
 })
 
-const outfitLabels = {
-  hoodie: '连帽卫衣',
-  cardigan: '针织开衫',
-  coat: '长外套',
-  sweater: '圆领毛衣',
-  jacket: '短夹克',
-  tee: '短袖上衣',
-  blazer: '利落外套',
-  robe: '宽松长袍',
-  vest: '叠穿背心',
-}
-
-const poseLabels = {
-  slouch: '松垮站姿',
-  open: '张手站姿',
-  guarded: '防守站姿',
-  upright: '站直姿态',
-  lean: '前倾姿态',
-  calm: '安静站姿',
-}
-
-const symbolLabels = {
-  ellipsis: '省略号徽章',
-  heart: '心形徽章',
-  shell: '冰壳徽章',
-  spiral: '脑内旋涡',
-  moon: '夜色月亮',
-  battery: '低电量图标',
-  sprout: '回弹嫩芽',
-  shield: '扛事盾牌',
-  spark: '情绪火花',
-  crown: '控场王冠',
-  stop: '边界标牌',
-  arrow: '直球箭头',
-  rose: '感情玫瑰',
-  lotus: '看破莲花',
-  shine: '氛围星芒',
-  siren: '预警警灯',
-  droplet: '内疚水滴',
-}
-
 function makeCodeFamilyMap(groups) {
   const map = {}
 
@@ -123,337 +93,303 @@ function pick(list, seed, offset = 0) {
   return list[(seed + offset) % list.length]
 }
 
-function rect(x, y, w, h, fill, extra = '') {
-  return `<rect x="${x * CELL}" y="${y * CELL}" width="${w * CELL}" height="${h * CELL}" fill="${fill}" shape-rendering="crispEdges"${extra} />`
+function polygon(points, fill, opacity = 1) {
+  return `<polygon points="${points}" fill="${fill}" opacity="${opacity}" />`
 }
 
-function strokeRect(x, y, w, h, stroke, fill = 'none') {
-  return `<rect x="${x * CELL}" y="${y * CELL}" width="${w * CELL}" height="${h * CELL}" fill="${fill}" stroke="${stroke}" stroke-width="${CELL}" shape-rendering="crispEdges" />`
+function filledPath(d, fill, opacity = 1) {
+  return `<path d="${d}" fill="${fill}" opacity="${opacity}" />`
 }
 
-function groupSvg(parts, x = 0, y = 0) {
-  return `<g transform="translate(${x * CELL} ${y * CELL})">${parts.join('')}</g>`
+function line(x1, y1, x2, y2, stroke, width = 4) {
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${width}" stroke-linecap="round" />`
+}
+
+function ellipse(cx, cy, rx, ry, fill, opacity = 1) {
+  return `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${fill}" opacity="${opacity}" />`
+}
+
+function circle(cx, cy, r, fill, opacity = 1) {
+  return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" opacity="${opacity}" />`
+}
+
+function outlinedRect(x, y, width, height, stroke, fill = 'none', radius = 4) {
+  return `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${radius}" ry="${radius}" fill="${fill}" stroke="${stroke}" stroke-width="4" />`
 }
 
 function buildSpec(code) {
   const seed = hashCode(code)
   const family = codeFamilyMap[code] ?? 'lowkey'
   const familyStyle = familyStyles[family]
-  const outfitPalette = pick(outfitPalettes, seed)
-  const background = pick(backgroundPalettes, seed, 2)
+  const background = pick(backgroundPalettes, seed, 1)
 
   return {
     code,
     family,
     background,
-    outfitPalette,
-    hairColor: pick(hairColors, seed, 1),
-    skinTone: pick(skinTones, seed, 3),
+    skin: pick(skinPalettes, seed, 2),
+    hair: pick(hairPalettes, seed, 4),
+    outfit: pick(outfitPalettes, seed, 6),
     ...familyStyle,
   }
 }
 
-function renderBackground(spec) {
-  const { outer, inner, dot } = spec.background
-  const frame = '#e5d1bc'
+function renderBackdrop(spec) {
+  const { accent, soft, deep, halo, mist } = spec.background
 
   return [
-    rect(0, 0, 24, 24, outer),
-    rect(1, 1, 22, 22, inner),
-    rect(2, 2, 20, 20, outer),
-    rect(0, 0, 24, 1, frame),
-    rect(0, 23, 24, 1, frame),
-    rect(0, 0, 1, 24, frame),
-    rect(23, 0, 1, 24, frame),
-    rect(3, 3, 1, 1, dot),
-    rect(20, 4, 1, 1, dot),
-    rect(5, 19, 1, 1, dot),
-    rect(18, 18, 1, 1, dot),
+    ellipse(160, 182, 108, 102, halo, 0.95),
+    polygon('56,230 100,102 174,88 134,260', mist, 0.58),
+    polygon('196,88 256,102 272,248 204,260', accent, 0.58),
+    ellipse(160, 292, 86, 14, 'rgba(54, 48, 44, 0.12)', 1),
+    line(72, 86, 248, 86, deep, 2),
   ].join('')
 }
 
-function renderHead(spec) {
-  const skin = spec.skinTone
+function renderBody(spec) {
+  const { base, light, shadow } = spec.outfit
+  const parts = [
+    polygon('58,320 86,260 136,230 188,230 236,260 262,320', shadow),
+    polygon('86,258 136,230 188,230 236,258 218,320 104,320', base),
+    polygon('138,230 160,250 184,230 198,320 124,320', light, 0.96),
+    polygon('104,320 132,238 160,250 138,320', shadow, 0.48),
+    polygon('182,236 216,320 198,320 160,250', shadow, 0.56),
+  ]
+
+  if (spec.bust === 'hoodie') {
+    parts.push(polygon('116,238 140,226 160,254 142,320 122,320', light, 0.92))
+    parts.push(polygon('182,226 206,238 196,320 178,320 160,254', light, 0.92))
+    parts.push(line(150, 248, 146, 280, light, 4), line(170, 248, 174, 280, light, 4))
+  }
+
+  if (spec.bust === 'cardigan' || spec.bust === 'blazer') {
+    parts.push(polygon('136,230 152,252 142,320 126,320', light, 0.96))
+    parts.push(polygon('184,230 176,252 194,320 178,320', light, 0.96))
+  }
+
+  if (spec.bust === 'coat') {
+    parts.push(polygon('126,224 146,252 138,320 112,320 98,270', light, 0.96))
+    parts.push(polygon('194,224 176,252 186,320 212,320 224,270', light, 0.96))
+  }
+
+  if (spec.bust === 'robe') {
+    parts.push(polygon('142,230 160,258 178,230 176,320 144,320', '#ebe8e0', 0.92))
+  }
+
+  if (spec.bust === 'vest') {
+    parts.push(polygon('128,242 160,232 192,242 184,320 136,320', light, 0.9))
+  }
+
+  if (spec.bust === 'tee') {
+    parts.push(polygon('92,266 122,240 122,282 110,320 82,320', light, 0.5))
+    parts.push(polygon('228,266 198,240 198,282 210,320 238,320', light, 0.5))
+  }
+
+  return parts.join('')
+}
+
+function renderFace(spec) {
+  const { base, light, shadow, deep } = spec.skin
+  const templates = {
+    square: {
+      outline: 'M126 88 L198 90 L220 122 L214 188 L160 232 L110 206 L102 128 Z',
+      left: '126,88 104,130 110,206 156,170 166,98',
+      center: '126,88 198,90 194,160 156,170 166,98',
+      right: '198,90 220,122 214,188 194,160',
+      chin: '110,206 156,170 194,160 214,188 160,232',
+      leftEar: '96,134 104,128 108,166 96,160',
+      rightEar: '218,132 228,140 222,172 212,164',
+      neckLeft: '146,220 160,212 158,248 138,248',
+      neckRight: '160,212 178,214 184,248 158,248',
+    },
+    soft: {
+      outline: 'M130 90 L194 90 L214 120 L210 184 L160 228 L114 202 L108 126 Z',
+      left: '130,90 108,126 114,202 156,168 166,100',
+      center: '130,90 194,90 190,158 156,168 166,100',
+      right: '194,90 214,120 210,184 190,158',
+      chin: '114,202 156,168 190,158 210,184 160,228',
+      leftEar: '102,134 110,130 112,164 102,158',
+      rightEar: '210,132 220,140 216,168 206,160',
+      neckLeft: '146,216 160,210 158,248 140,248',
+      neckRight: '160,210 176,214 182,248 158,248',
+    },
+    diamond: {
+      outline: 'M138 86 L190 90 L218 124 L210 180 L160 236 L112 204 L106 128 Z',
+      left: '138,86 106,128 112,204 156,166 164,98',
+      center: '138,86 190,90 190,156 156,166 164,98',
+      right: '190,90 218,124 210,180 190,156',
+      chin: '112,204 156,166 190,156 210,180 160,236',
+      leftEar: '100,136 108,130 110,164 100,158',
+      rightEar: '214,132 224,142 218,170 208,160',
+      neckLeft: '146,222 160,214 158,248 138,248',
+      neckRight: '160,214 176,216 184,248 158,248',
+    },
+    narrow: {
+      outline: 'M134 86 L192 88 L212 120 L206 194 L160 236 L118 208 L110 126 Z',
+      left: '134,86 110,126 118,208 156,176 166,96',
+      center: '134,86 192,88 190,164 156,176 166,96',
+      right: '192,88 212,120 206,194 190,164',
+      chin: '118,208 156,176 190,164 206,194 160,236',
+      leftEar: '104,136 110,130 114,168 104,162',
+      rightEar: '208,134 218,142 214,174 204,166',
+      neckLeft: '148,224 160,216 158,248 140,248',
+      neckRight: '160,216 174,218 180,248 158,248',
+    },
+  }
+
+  const t = templates[spec.faceShape] ?? templates.soft
+
   return [
-    rect(8, 5, 8, 1, skin),
-    rect(7, 6, 10, 4, skin),
-    rect(8, 10, 8, 2, skin),
-    rect(9, 12, 6, 1, skin),
-    rect(10, 13, 4, 1, skin),
+    polygon(t.leftEar, shadow, 0.95),
+    polygon(t.rightEar, shadow, 0.95),
+    polygon(t.left, light),
+    polygon(t.center, base),
+    polygon(t.right, shadow),
+    polygon(t.chin, deep, 0.42),
+    polygon(t.neckLeft, shadow),
+    polygon(t.neckRight, base),
   ].join('')
 }
 
 function renderHair(spec) {
-  const hair = spec.hairColor
+  const { base, shadow, highlight } = spec.hair
   const styles = {
-    messy: [
-      rect(7, 4, 10, 1, hair),
-      rect(6, 5, 3, 2, hair),
-      rect(9, 5, 8, 2, hair),
-      rect(7, 7, 2, 2, hair),
-      rect(15, 7, 2, 2, hair),
+    crop: [
+      polygon('120,82 188,84 206,112 118,114 108,96', base),
+      polygon('120,82 160,74 162,104 126,112 112,98', shadow),
+      polygon('160,76 194,82 198,104 170,100', highlight),
+    ],
+    parted: [
+      polygon('128,80 198,84 208,110 178,112 150,102 118,112 112,96', base),
+      polygon('130,80 158,74 154,104 124,112 112,98', shadow),
+      polygon('162,74 198,82 206,104 170,100', highlight),
     ],
     bob: [
-      rect(7, 4, 10, 2, hair),
-      rect(6, 6, 3, 5, hair),
-      rect(15, 6, 3, 5, hair),
-      rect(8, 6, 8, 1, hair),
-    ],
-    long: [
-      rect(7, 4, 10, 2, hair),
-      rect(6, 6, 3, 7, hair),
-      rect(15, 6, 3, 7, hair),
-      rect(8, 6, 8, 1, hair),
-    ],
-    side: [
-      rect(7, 4, 10, 2, hair),
-      rect(6, 5, 4, 3, hair),
-      rect(14, 6, 2, 4, hair),
-      rect(8, 6, 8, 1, hair),
+      polygon('126,82 194,86 210,118 204,170 194,166 186,110 136,110 126,170 114,166 110,116', base),
+      polygon('126,82 164,76 160,108 138,110 118,102', shadow),
+      polygon('164,76 196,84 202,104 176,102', highlight),
     ],
     wave: [
-      rect(7, 4, 10, 2, hair),
-      rect(6, 6, 2, 6, hair),
-      rect(15, 6, 2, 6, hair),
-      rect(8, 6, 8, 1, hair),
-      rect(7, 11, 2, 1, hair),
-      rect(14, 11, 2, 1, hair),
-    ],
-    crop: [
-      rect(8, 4, 8, 2, hair),
-      rect(7, 6, 2, 2, hair),
-      rect(15, 6, 2, 2, hair),
+      polygon('124,82 196,84 210,118 198,124 188,112 158,104 126,112 112,122 108,110', base),
+      polygon('124,82 156,76 152,104 132,110 116,100', shadow),
+      polygon('164,78 194,84 204,102 178,100', highlight),
+      polygon('112,122 126,112 128,162 116,170', base, 0.96),
+      polygon('188,112 204,124 198,166 186,162', base, 0.96),
     ],
     spike: [
-      rect(9, 3, 2, 1, hair),
-      rect(12, 3, 2, 1, hair),
-      rect(7, 4, 10, 2, hair),
-      rect(6, 6, 2, 2, hair),
-      rect(16, 6, 1, 2, hair),
+      polygon('118,88 136,66 154,84 174,62 194,88 206,116 118,114', base),
+      polygon('118,88 136,66 144,92 126,112', shadow),
+      polygon('174,62 194,88 198,104 176,98', highlight),
+    ],
+    slick: [
+      polygon('122,84 204,90 210,112 160,106 126,116 114,100', base),
+      polygon('122,84 172,74 170,102 128,110 116,98', shadow),
+      polygon('174,78 206,88 208,104 182,100', highlight),
     ],
     bun: [
-      rect(10, 2, 4, 2, hair),
-      rect(8, 4, 8, 2, hair),
-      rect(7, 6, 2, 3, hair),
-      rect(15, 6, 2, 3, hair),
+      circle(174, 70, 14, base),
+      polygon('124,84 194,88 204,114 134,116 114,104', base),
+      polygon('126,84 154,76 150,106 132,114 118,102', shadow),
+      polygon('160,78 192,88 198,104 172,100', highlight),
     ],
-    short: [
-      rect(7, 4, 10, 1, hair),
-      rect(7, 5, 10, 1, hair),
-      rect(7, 6, 2, 2, hair),
-      rect(15, 6, 2, 2, hair),
+    lift: [
+      polygon('122,88 136,68 166,70 196,82 206,112 122,114', base),
+      polygon('122,88 140,68 154,92 130,112', shadow),
+      polygon('164,72 194,82 200,104 174,100', highlight),
+    ],
+    messy: [
+      polygon('120,86 138,72 162,80 178,68 198,86 208,118 122,114', base),
+      polygon('120,86 140,72 150,94 128,112', shadow),
+      polygon('170,70 198,86 202,104 178,98', highlight),
+    ],
+    hooded: [
+      polygon('112,102 126,80 196,82 210,104 206,158 196,144 186,108 134,110 124,148 114,158', base),
+      polygon('124,82 160,76 156,106 132,110 116,102', shadow),
+      polygon('162,76 194,82 202,100 176,98', highlight),
     ],
   }
 
   return (styles[spec.hairStyle] ?? styles.crop).join('')
 }
 
-function renderFace(spec) {
-  const ink = '#2d2622'
-  const blush = '#d98a8d'
-  const accent = spec.outfitPalette.accent
+function renderFeatures(spec) {
+  const ink = '#2a2521'
   const parts = []
+  const eyeY = spec.faceShape === 'narrow' ? 150 : 146
+  const mouthY = spec.faceShape === 'narrow' ? 194 : 188
 
-  const eyesByExpression = {
-    half: [rect(9, 8, 2, 1, ink), rect(13, 8, 2, 1, ink)],
-    tired: [rect(9, 9, 2, 1, ink), rect(13, 9, 2, 1, ink)],
-    soft: [rect(9, 8, 1, 1, ink), rect(14, 8, 1, 1, ink)],
-    sharp: [rect(9, 8, 2, 1, ink), rect(13, 8, 2, 1, ink), rect(8, 7, 2, 1, ink), rect(14, 7, 2, 1, ink)],
-    wide: [rect(9, 8, 2, 2, ink), rect(13, 8, 2, 2, ink)],
-    smile: [rect(9, 8, 2, 1, ink), rect(13, 8, 2, 1, ink)],
-    flat: [rect(9, 8, 2, 1, ink), rect(13, 8, 2, 1, ink)],
-    smirk: [rect(9, 8, 2, 1, ink), rect(13, 8, 2, 1, ink)],
-    closed: [rect(9, 8, 2, 1, ink), rect(13, 8, 2, 1, ink)],
+  const expressions = {
+    flat: () => {
+      parts.push(line(136, eyeY, 148, eyeY, ink, 4), line(174, eyeY, 186, eyeY, ink, 4), line(146, mouthY, 176, mouthY, ink, 4))
+    },
+    soft: () => {
+      parts.push(line(136, eyeY, 148, eyeY + 1, ink, 4), line(174, eyeY + 1, 186, eyeY, ink, 4), line(146, mouthY, 160, mouthY + 4, ink, 4), line(160, mouthY + 4, 176, mouthY, ink, 4))
+    },
+    tired: () => {
+      parts.push(line(134, eyeY + 2, 148, eyeY, ink, 4), line(174, eyeY, 188, eyeY + 2, ink, 4), line(148, mouthY + 2, 176, mouthY + 2, ink, 4))
+    },
+    tense: () => {
+      parts.push(line(132, eyeY - 8, 146, eyeY - 4, ink, 4), line(176, eyeY - 4, 190, eyeY - 8, ink, 4), line(136, eyeY, 148, eyeY + 1, ink, 4), line(174, eyeY + 1, 186, eyeY, ink, 4), line(146, mouthY + 2, 176, mouthY, ink, 4))
+    },
+    open: () => {
+      parts.push(circle(142, eyeY + 2, 4, ink), circle(180, eyeY + 2, 4, ink), outlinedRect(148, mouthY - 2, 26, 18, ink, '#3f2d26', 6))
+    },
+    sharp: () => {
+      parts.push(line(132, eyeY - 8, 148, eyeY - 4, ink, 4), line(172, eyeY - 4, 188, eyeY - 8, ink, 4), line(136, eyeY, 148, eyeY + 1, ink, 4), line(174, eyeY + 1, 186, eyeY, ink, 4), line(146, mouthY, 176, mouthY + 1, ink, 4))
+    },
+    smirk: () => {
+      parts.push(line(136, eyeY, 148, eyeY + 1, ink, 4), line(174, eyeY + 1, 186, eyeY, ink, 4), line(146, mouthY + 2, 162, mouthY + 2, ink, 4), line(162, mouthY + 2, 178, mouthY - 2, ink, 4))
+    },
+    calm: () => {
+      parts.push(line(134, eyeY + 1, 148, eyeY + 3, ink, 4), line(174, eyeY + 3, 188, eyeY + 1, ink, 4), line(148, mouthY, 174, mouthY, ink, 4))
+    },
+    smile: () => {
+      parts.push(line(136, eyeY, 148, eyeY + 1, ink, 4), line(174, eyeY + 1, 186, eyeY, ink, 4), line(146, mouthY, 160, mouthY + 6, ink, 4), line(160, mouthY + 6, 176, mouthY, ink, 4))
+    },
   }
 
-  const mouthsByExpression = {
-    half: rect(11, 10, 2, 1, ink),
-    tired: rect(10, 11, 3, 1, ink),
-    soft: rect(11, 10, 2, 1, ink),
-    sharp: rect(11, 10, 2, 1, ink),
-    wide: rect(10, 10, 4, 1, ink),
-    smile: rect(10, 10, 4, 1, ink),
-    flat: rect(10, 10, 4, 1, ink),
-    smirk: rect(11, 10, 3, 1, ink),
-    closed: rect(10, 10, 4, 1, accent),
-  }
+  ;(expressions[spec.expression] ?? expressions.soft)()
 
-  parts.push(...(eyesByExpression[spec.expression] ?? eyesByExpression.soft))
-  parts.push(mouthsByExpression[spec.expression] ?? mouthsByExpression.soft)
-
-  if (spec.accessory === 'blush') {
-    parts.push(rect(8, 10, 1, 1, blush), rect(15, 10, 1, 1, blush))
-  }
-
-  if (spec.accessory === 'brow') {
-    parts.push(rect(9, 7, 2, 1, ink), rect(13, 7, 2, 1, ink))
-  }
-
-  if (spec.accessory === 'sweat') {
-    parts.push(rect(16, 6, 1, 2, '#7cc9df'))
-  }
+  parts.push(polygon('156,154 164,154 168,176 160,184 152,176', spec.skin.shadow, 0.66))
 
   return parts.join('')
 }
 
 function renderAccessory(spec) {
-  const ink = '#2d2622'
-  const accent = spec.outfitPalette.accent
-
+  const ink = '#2a2521'
+  const soft = '#d7dbe0'
   const accessories = {
-    glasses: [strokeRect(8, 7, 3, 3, ink), strokeRect(13, 7, 3, 3, ink), rect(11, 8, 2, 1, ink)],
-    scarf: [rect(8, 13, 8, 2, accent), rect(12, 15, 2, 3, accent)],
-    bandage: [rect(14, 6, 2, 1, '#e8d9ae'), rect(15, 5, 1, 3, '#c6b277')],
-    clip: [rect(15, 4, 2, 1, accent), rect(16, 3, 1, 1, accent)],
-    star: [rect(15, 4, 1, 3, accent), rect(14, 5, 3, 1, accent)],
-    ear: [rect(17, 8, 1, 2, accent)],
+    glasses: [
+      outlinedRect(126, 136, 28, 18, ink, 'none', 5),
+      outlinedRect(166, 136, 28, 18, ink, 'none', 5),
+      line(154, 145, 166, 145, ink, 4),
+    ],
+    earring: [circle(106, 170, 4, '#d0b06b')],
+    patch: [filledPath('M188 176 L204 176 L200 188 L184 188 Z', '#efe2a6'), line(188, 180, 200, 184, '#c5aa5f', 2)],
+    earpiece: [circle(206, 158, 4, soft), line(206, 162, 200, 184, soft, 3)],
+    brow: [line(134, 136, 150, 134, ink, 4), line(170, 134, 186, 136, ink, 4)],
+    clip: [filledPath('M194 108 L210 108 L204 126 L188 126 Z', '#e1b899')],
     none: [],
-    blush: [],
-    brow: [],
-    sweat: [],
   }
 
   return (accessories[spec.accessory] ?? []).join('')
 }
 
-function renderBody(spec) {
-  const { base, accent, dark } = spec.outfitPalette
-  const skin = spec.skinTone
-  const parts = []
-
-  const poses = {
-    slouch: [
-      rect(9, 14, 6, 5, base),
-      rect(8, 15, 2, 4, base),
-      rect(15, 15, 2, 4, base),
-      rect(10, 19, 2, 3, dark),
-      rect(13, 19, 2, 3, dark),
-    ],
-    open: [
-      rect(9, 14, 6, 5, base),
-      rect(7, 15, 2, 4, base),
-      rect(15, 15, 2, 4, base),
-      rect(10, 19, 2, 3, dark),
-      rect(13, 19, 2, 3, dark),
-    ],
-    guarded: [
-      rect(9, 14, 6, 5, base),
-      rect(8, 15, 3, 2, base),
-      rect(13, 15, 3, 2, base),
-      rect(10, 19, 2, 3, dark),
-      rect(13, 19, 2, 3, dark),
-    ],
-    upright: [
-      rect(9, 14, 6, 5, base),
-      rect(8, 14, 2, 4, base),
-      rect(15, 14, 2, 4, base),
-      rect(10, 19, 2, 3, dark),
-      rect(13, 19, 2, 3, dark),
-    ],
-    lean: [
-      rect(9, 14, 6, 5, base),
-      rect(8, 15, 2, 4, base),
-      rect(15, 14, 2, 5, base),
-      rect(10, 19, 2, 3, dark),
-      rect(13, 19, 2, 3, dark),
-    ],
-    calm: [
-      rect(9, 14, 6, 7, base),
-      rect(8, 15, 2, 4, base),
-      rect(15, 15, 2, 4, base),
-      rect(10, 21, 2, 1, dark),
-      rect(13, 21, 2, 1, dark),
-    ],
-  }
-
-  const outfitDetails = {
-    hoodie: [rect(10, 15, 4, 1, accent), rect(11, 16, 1, 3, accent), rect(13, 16, 1, 3, accent)],
-    cardigan: [rect(11, 14, 1, 5, accent), rect(13, 14, 1, 5, accent), rect(12, 15, 1, 1, dark)],
-    coat: [rect(11, 14, 1, 6, accent), rect(13, 14, 1, 6, accent)],
-    sweater: [rect(10, 14, 4, 1, accent)],
-    jacket: [rect(10, 14, 1, 5, accent), rect(14, 14, 1, 5, accent)],
-    tee: [rect(8, 15, 2, 2, accent), rect(15, 15, 2, 2, accent)],
-    blazer: [rect(11, 14, 1, 5, accent), rect(13, 14, 1, 5, accent), rect(10, 15, 1, 1, accent), rect(14, 15, 1, 1, accent)],
-    robe: [rect(11, 14, 2, 7, accent)],
-    vest: [rect(10, 15, 4, 3, accent)],
-  }
-
-  parts.push(...(poses[spec.pose] ?? poses.upright))
-  parts.push(...(outfitDetails[spec.outfit] ?? []))
-  parts.push(rect(10, 13, 4, 1, skin))
-  parts.push(rect(7, 18, 2, 1, skin))
-  parts.push(rect(16, 18, 2, 1, skin))
-  parts.push(rect(9, 22, 3, 1, '#2b2b31'))
-  parts.push(rect(13, 22, 3, 1, '#2b2b31'))
-
-  return parts.join('')
-}
-
-function renderSymbol(spec) {
-  const fill = spec.outfitPalette.base
-  const accent = spec.outfitPalette.accent
-  const dark = spec.outfitPalette.dark
-
-  const symbolMatrix = {
-    ellipsis: ['.....', '.X.X.', '..X..', '.....', '.....'],
-    heart: ['.X.X.', 'XXXXX', 'XXXXX', '.XXX.', '..X..'],
-    shell: ['.XXX.', 'X...X', 'XXXXX', '.XXX.', '..X..'],
-    spiral: ['XXXXX', '....X', '.XXX.', '.X...', '.XXXX'],
-    moon: ['..XX.', '.XX..', '.XX..', '.XX..', '..XX.'],
-    battery: ['.XXX.', 'X...X', 'XXXX.', 'X...X', '.XXX.'],
-    sprout: ['..X..', '.XXX.', '..X..', '.X.X.', 'X...X'],
-    shield: ['.XXX.', 'XXXXX', 'XXXXX', '.XXX.', '..X..'],
-    spark: ['..X..', 'XXXXX', '..X..', '.X.X.', 'X...X'],
-    crown: ['X.X.X', 'XXXXX', '.XXX.', '.XXX.', '.....'],
-    stop: ['XXXXX', 'X...X', 'X...X', 'X...X', 'XXXXX'],
-    arrow: ['..X..', '.XX..', 'XXXXX', '.XX..', '..X..'],
-    rose: ['.XXX.', 'XXXXX', '.XXX.', '..X..', '.X.X.'],
-    lotus: ['.X.X.', 'XXXXX', '.XXX.', '..X..', '.X.X.'],
-    shine: ['X...X', '.X.X.', '..X..', '.X.X.', 'X...X'],
-    siren: ['.XXX.', 'XXXXX', '.XXX.', 'XXXXX', '..X..'],
-    droplet: ['..X..', '.XXX.', '.XXX.', '.XXX.', '..X..'],
-  }
-
-  const rows = symbolMatrix[spec.symbol] ?? symbolMatrix.ellipsis
-  const palette = { X: fill, Y: accent, Z: dark }
-  const parts = []
-
-  rows.forEach((row, y) => {
-    row.split('').forEach((char, x) => {
-      if (!palette[char]) {
-        return
-      }
-
-      parts.push(rect(18 + x, 3 + y, 1, 1, palette[char]))
-    })
-  })
-
-  return parts.join('')
-}
-
 function buildSvg(spec) {
-  const shadow = rect(7, 23, 10, 1, 'rgba(68, 48, 34, 0.18)')
-
   return `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${VIEWBOX} ${VIEWBOX}" role="img" aria-hidden="true">
-      ${renderBackground(spec)}
-      ${shadow}
-      ${renderHead(spec)}
-      ${renderHair(spec)}
+      ${renderBackdrop(spec)}
       ${renderBody(spec)}
       ${renderFace(spec)}
+      ${renderHair(spec)}
+      ${renderFeatures(spec)}
       ${renderAccessory(spec)}
-      ${renderSymbol(spec)}
     </svg>
   `
 }
 
 function toDataUri(svg) {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg.replace(/\s+/g, ' ').trim())}`
-}
-
-function getCaption(spec) {
-  return `${outfitLabels[spec.outfit]} / ${poseLabels[spec.pose]} / ${symbolLabels[spec.symbol]}`
 }
 
 const cache = new Map()
@@ -463,9 +399,12 @@ export function getCharacterArt(code, name = '') {
     const spec = buildSpec(code)
     cache.set(code, {
       src: toDataUri(buildSvg(spec)),
-      alt: `${name || code} 的像素风角色造型`,
-      caption: getCaption(spec),
-      family: spec.family,
+      alt: `${name || code} 的几何插画人物造型`,
+      theme: {
+        accent: spec.background.accent,
+        soft: spec.background.soft,
+        deep: spec.background.deep,
+      },
     })
   }
 
