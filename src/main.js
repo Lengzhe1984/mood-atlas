@@ -1,6 +1,7 @@
 import './style.css'
 import { appMeta } from './app-meta.js'
 import { getCharacterArt } from './character-art.js'
+import { buildHeatSubmissionUrl, fetchHeatBoard, readHeatCache, sortHeatEntries, writeHeatCache } from './heat.js'
 import { answerOptions, axisSections, quizQuestions, totalQuestions } from './quiz-data.js'
 import { indexedResults } from './results.js'
 import { getAnsweredCount, getFinalResult, isQuizComplete } from './scoring.js'
@@ -10,7 +11,7 @@ const app = document.querySelector('#app')
 const answerLabelByValue = Object.fromEntries(answerOptions.map((option) => [option.value, option.label]))
 const quizHelperTips = [
   '选最像你的直觉，不需要想标准答案。',
-  '每题都用 1 到 5 分量表，后台会自动处理正反向记分。',
+  '每题都用 1 到 5 分量表，系统会自动完成计分。',
   '如果你中途停下，再回来时这一页还能继续补答。',
 ]
 
@@ -21,24 +22,6 @@ const navItems = [
   { view: 'quiz', label: '开始测试' },
 ]
 
-const rankingBoards = [
-  {
-    title: '上来先看榜',
-    description: '第一次逛这套测试时，最容易迅速找到感觉的几型。',
-    codes: ['LOOP', 'OJBK', 'FAKE', 'JOKR', 'PANIC', 'CLING', 'BOSS', 'DEAD'],
-  },
-  {
-    title: '朋友最容易认出来榜',
-    description: '那种朋友看一眼就会说“你就是这个”的类型。',
-    codes: ['HOLD', 'COLD', 'NOPE', 'CARE', 'MUMM', 'MOODY', 'SWEET', 'BOSS'],
-  },
-  {
-    title: '越看越像你榜',
-    description: '不一定第一眼最炸，但很容易在细节里越读越像本人。',
-    codes: ['WHYY', 'BUBU', 'GLASS', 'EMOO', 'GREYY', 'WORTH', 'NERDY', 'ALIVE'],
-  },
-]
-
 const aboutSteps = [
   {
     step: 'Step 1',
@@ -47,13 +30,13 @@ const aboutSteps = [
   },
   {
     step: 'Step 2',
-    title: '后台先算 6 条隐藏轴',
-    body: '前台看起来像梗图人格，后台其实是 6 维二选一模型，先把你的反应方式拆开再计分。',
+    title: '系统会先整理 6 个核心维度',
+    body: '它会综合你在表达、关系、行动和情绪上的回答方式，再判断你更靠近哪一类反应组合。',
   },
   {
     step: 'Step 3',
     title: '最后映射成 64 个独立结果',
-    body: '结果不是四个字母拼出来的，而是 6 位隐藏索引落到 64 型结果表，所以每型都能单独写人话。',
+    body: '结果不是四个字母硬拼出来的，而是先看整体回答，再落到 64 型里最接近的一型，所以每种都能写得更具体。',
   },
 ]
 
@@ -63,6 +46,10 @@ const state = {
   previewCode: 'LOOP',
   copyState: 'idle',
   preservedQuizScrollY: null,
+  rankingStatus: 'idle',
+  rankingEntries: [],
+  rankingUpdatedAt: null,
+  rankingTotal: 0,
 }
 
 let copyResetTimer = null
@@ -88,6 +75,32 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max)
 }
 
+function formatTimeAgo(timestamp) {
+  if (!Number.isFinite(timestamp)) {
+    return '刚刚更新'
+  }
+
+  const diff = Date.now() - timestamp
+  const minutes = Math.max(0, Math.round(diff / 60000))
+
+  if (minutes < 1) {
+    return '刚刚更新'
+  }
+
+  if (minutes < 60) {
+    return `${minutes} 分钟前更新`
+  }
+
+  const hours = Math.round(minutes / 60)
+
+  if (hours < 24) {
+    return `${hours} 小时前更新`
+  }
+
+  const days = Math.round(hours / 24)
+  return `${days} 天前更新`
+}
+
 function getResultByCode(code) {
   return indexedResults.find((result) => result.code === code) ?? indexedResults[0]
 }
@@ -96,8 +109,8 @@ function getPreviewResult() {
   return getResultByCode(state.previewCode)
 }
 
-function getResultsByCodes(codes) {
-  return codes.map((code) => getResultByCode(code)).filter(Boolean)
+function getCurrentResultPayload() {
+  return isQuizComplete(state.answers) ? getFinalResult(state.answers) : null
 }
 
 function getRelatedResults(index) {
@@ -131,6 +144,72 @@ function scrollToSelector(selector) {
   document.querySelector(selector)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
+function getHeatCountForCode(code) {
+  return state.rankingEntries.find((entry) => entry.code === code)?.count ?? null
+}
+
+function seedRankingEntries() {
+  return indexedResults.map((result) => ({
+    ...result,
+    count: getHeatCountForCode(result.code) ?? 0,
+  }))
+}
+
+function applyRankingPayload(payload) {
+  state.rankingEntries = sortHeatEntries(payload.entries)
+  state.rankingTotal = payload.totalCount
+  state.rankingUpdatedAt = payload.updatedAt
+  state.rankingStatus = 'loaded'
+  writeHeatCache(payload)
+}
+
+async function ensureRankingData(force = false) {
+  if (state.rankingStatus === 'loading') {
+    return
+  }
+
+  if (!force) {
+    if (state.rankingStatus === 'loaded' && state.rankingEntries.length) {
+      return
+    }
+
+    const cached = readHeatCache()
+
+    if (cached) {
+      applyRankingPayload(cached)
+      render()
+      return
+    }
+  }
+
+  state.rankingStatus = 'loading'
+  render()
+
+  try {
+    const payload = await fetchHeatBoard(indexedResults)
+    applyRankingPayload(payload)
+  } catch {
+    state.rankingStatus = 'error'
+  }
+
+  render()
+}
+
+function openHeatSubmission() {
+  const payload = getCurrentResultPayload()
+
+  if (!payload) {
+    return
+  }
+
+  const submissionUrl = buildHeatSubmissionUrl(payload.result, {
+    binaryIndex: payload.binaryIndex,
+    index: payload.index,
+  })
+
+  window.open(submissionUrl, '_blank', 'noopener,noreferrer')
+}
+
 function goToView(view, options = {}) {
   const { scroll = true, code = null } = options
 
@@ -144,6 +223,10 @@ function goToView(view, options = {}) {
 
   state.view = view
   render()
+
+  if (view === 'rankings') {
+    void ensureRankingData()
+  }
 
   if (scroll) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -306,7 +389,7 @@ function renderHomeScreen() {
     <main class="layout">
       <section class="hero-panel" id="hero">
         <div class="hero-copy">
-          <p class="eyebrow">Beta v${escapeHtml(appMeta.version)}</p>
+          <p class="eyebrow">Atlas Personality Test</p>
           <h1>别测 MBTI 了，<br />你这点毛病四个字母装不下。</h1>
           <div class="hero-story">
             <p class="lede story-line">有的人一委屈就先说没事。</p>
@@ -321,7 +404,7 @@ function renderHomeScreen() {
             </article>
             <article class="stat-card">
               <strong>6</strong>
-              <span>嘴上是梗，后台是六维模型</span>
+              <span>从 6 个维度慢慢看你像哪一型</span>
             </article>
             <article class="stat-card">
               <strong>64</strong>
@@ -355,9 +438,9 @@ function renderHomeScreen() {
 
       <section class="mechanics-panel update-panel" id="latest-update">
         <div class="section-heading">
-          <p class="eyebrow">Release Notes</p>
-          <h2>最近更新</h2>
-          <p class="section-copy">用更轻的文字方式记录最近几次版本变化，像 README 一样直接看重点。</p>
+          <p class="eyebrow">Recently Added</p>
+          <h2>最近新增</h2>
+          <p class="section-copy">最近把人物卡、导航页和热度榜都补得更完整了，直接看重点就行。</p>
         </div>
 
         <div class="release-log">
@@ -367,7 +450,7 @@ function renderHomeScreen() {
                 <article class="release-entry">
                   <div class="release-entry-head">
                     <span class="release-version">v${escapeHtml(item.version)}</span>
-                    ${item.version === appMeta.version ? '<span class="release-current">current</span>' : ''}
+                    ${item.version === appMeta.version ? '<span class="release-current">最新</span>' : ''}
                   </div>
                   <ul class="release-entry-list">
                     ${item.notes.map((note) => `<li>${escapeHtml(note)}</li>`).join('')}
@@ -384,12 +467,13 @@ function renderHomeScreen() {
 
 function renderTypeCard(result) {
   const isActive = result.code === state.previewCode
+  const heatCount = getHeatCountForCode(result.code)
 
   return `
     <button class="result-card type-browser-card${isActive ? ' is-active' : ''}" type="button" data-open-type="${escapeHtml(result.code)}">
       <div class="result-top">
         <span class="result-code">${escapeHtml(result.code)}</span>
-        <span class="result-index">${escapeHtml(result.englishName)}</span>
+        <span class="result-index">${heatCount !== null ? `${heatCount} 次加入榜单` : escapeHtml(result.englishName)}</span>
       </div>
       <h3 class="result-name">${escapeHtml(result.name)}</h3>
       <p class="result-verdict">${escapeHtml(result.verdict)}</p>
@@ -400,6 +484,7 @@ function renderTypeCard(result) {
 
 function renderTypesScreen() {
   const selected = getPreviewResult()
+  const selectedHeatCount = getHeatCountForCode(selected.code)
 
   return `
     <main class="layout">
@@ -418,6 +503,7 @@ function renderTypesScreen() {
             <span class="result-chip">当前选中：${escapeHtml(selected.code)}</span>
             <span class="result-chip">${escapeHtml(selected.englishName)}</span>
             <span class="result-chip">${escapeHtml(selected.name)}</span>
+            ${selectedHeatCount !== null ? `<span class="result-chip">已加入热度榜 ${selectedHeatCount} 次</span>` : ''}
           </div>
         </div>
 
@@ -456,59 +542,79 @@ function renderRankingCard(result, rank) {
     <button class="result-card ranking-card" type="button" data-open-type="${escapeHtml(result.code)}">
       <div class="result-top">
         <span class="ranking-rank">#${rank}</span>
-        <span class="result-code">${escapeHtml(result.code)}</span>
+        <span class="result-code">${escapeHtml(result.count)} 次</span>
       </div>
       <h3 class="result-name">${escapeHtml(result.name)}</h3>
-      <p class="result-verdict">${escapeHtml(result.verdict)}</p>
-      <p class="result-description result-card-note">${escapeHtml(compactText(result.charm, 38))}</p>
+      <p class="result-verdict">${escapeHtml(result.code)} · ${escapeHtml(result.englishName)}</p>
+      <p class="result-description result-card-note">${escapeHtml(compactText(result.verdict, 38))}</p>
     </button>
   `
 }
 
 function renderRankingsScreen() {
+  const rankingEntries = state.rankingEntries.length ? state.rankingEntries : seedRankingEntries()
+  const topEntries = rankingEntries.slice(0, 12)
+
   return `
     <main class="layout">
       <section class="page-hero">
         <div class="page-hero-copy">
-          <p class="eyebrow">SBTI Rankings</p>
-          <h1>SBTI 人格排行榜</h1>
-          <p class="lede">这页先放当前版本的站内编辑榜，帮你从 64 型里快速找到切入口。它不是全站用户投票榜，但很适合先逛、先代入、先挑几型看。</p>
+          <p class="eyebrow">Atlas Rankings</p>
+          <h1>Atlas 人格热度榜</h1>
+          <p class="lede">这里展示的是用户主动把结果加入 Atlas 热度榜后的累计公开提交数。每次生成结果后，都可以在结果页把自己的类型加入榜单。</p>
 
           <div class="action-row">
-            <button class="primary-btn" data-nav-view="types" type="button">先逛人格类型</button>
-            <button class="secondary-btn" data-nav-view="quiz" type="button">直接开始测试</button>
+            <button class="primary-btn" data-nav-view="quiz" type="button">测完加入热度榜</button>
+            <button class="secondary-btn" data-refresh-ranking type="button">刷新热度数据</button>
           </div>
         </div>
 
         <aside class="palette-card about-callout">
-          <p class="mini-label">当前榜单说明</p>
-          <h3>先做成站内编辑榜，后面再接真实热度</h3>
-          <p class="summary-note">静态站点这一版先不给你假装用户总榜，先把“先看哪几型更容易有手感”这件事做好。以后如果接入结果提交，再换成实时榜单也顺手。</p>
+          <p class="mini-label">公开热度概览</p>
+          <h3>${state.rankingStatus === 'loading' ? '正在刷新最新榜单' : `${state.rankingTotal} 次公开提交`}</h3>
+          <p class="summary-note">
+            ${
+              state.rankingStatus === 'error'
+                ? '热度数据暂时没有加载成功，稍后刷新一下就好。'
+                : `当前已统计 ${rankingEntries.length} 种人格类型，${formatTimeAgo(state.rankingUpdatedAt)}。`
+            }
+          </p>
         </aside>
       </section>
 
       <section class="mechanics-panel">
         <div class="section-heading">
-          <p class="eyebrow">Ranking Boards</p>
-          <h2>先从这几张榜单入手</h2>
-          <p class="section-copy">每张榜单都能点进去跳到对应人格类型页，继续看人物卡和整段文案。</p>
+          <p class="eyebrow">Live Heat</p>
+          <h2>当前热度最高的 12 型</h2>
+          <p class="section-copy">点任意一型，就能跳去人格类型页继续看人物卡和完整文案。</p>
         </div>
 
         <div class="ranking-board-grid">
-          ${rankingBoards
+          ${topEntries.map((result, index) => renderRankingCard(result, index + 1)).join('')}
+        </div>
+      </section>
+
+      <section class="library-panel">
+        <div class="library-toolbar">
+          <div class="section-heading">
+            <p class="eyebrow">Full Ranking</p>
+            <h2>完整热度榜</h2>
+            <p class="section-copy">按累计公开提交数从高到低排序，提交数相同就按类型索引顺序排列。</p>
+          </div>
+        </div>
+
+        <div class="ranking-row-list">
+          ${rankingEntries
             .map(
-              (board) => `
-                <article class="ranking-board">
-                  <div class="ranking-board-head">
-                    <h3>${escapeHtml(board.title)}</h3>
-                    <p class="ranking-note">${escapeHtml(board.description)}</p>
-                  </div>
-                  <div class="ranking-list">
-                    ${getResultsByCodes(board.codes)
-                      .map((result, index) => renderRankingCard(result, index + 1))
-                      .join('')}
-                  </div>
-                </article>
+              (result, index) => `
+                <button class="ranking-row" type="button" data-open-type="${escapeHtml(result.code)}">
+                  <span class="ranking-row-rank">#${index + 1}</span>
+                  <span class="ranking-row-main">
+                    <strong>${escapeHtml(result.name)}（${escapeHtml(result.code)}）</strong>
+                    <small>${escapeHtml(result.englishName)}</small>
+                  </span>
+                  <span class="ranking-row-count">${escapeHtml(result.count)} 次</span>
+                </button>
               `,
             )
             .join('')}
@@ -525,7 +631,7 @@ function renderAboutScreen() {
         <div class="page-hero-copy">
           <p class="eyebrow">About The Test</p>
           <h1>这套测试到底怎么跑</h1>
-          <p class="lede">前台看起来像是在测你那些小毛病，后台其实是一套结构很稳的六维模型。不是 64 个结果直接瞎配题，而是先测维度，再映射结果。</p>
+          <p class="lede">它会先看你在表达、关系、行动和情绪上的回答方式，再综合映射成 64 种结果里的其中一型，所以每种结果都能写得更像真人。</p>
 
           <div class="stat-row">
             <article class="stat-card">
@@ -545,16 +651,16 @@ function renderAboutScreen() {
 
         <aside class="palette-card about-callout">
           <p class="mini-label">一句话版</p>
-          <h3>梗图是前台，模型在后台。</h3>
-          <p class="summary-note">用户看到的是 64 个单独人格结果，后台维护的是 6 条隐藏轴和一张稳定映射表，所以这套东西既好玩，也能长期迭代。</p>
+          <h3>先看整体反应，再落到最像的一型。</h3>
+          <p class="summary-note">这套测试不是用四个字母硬概括你，而是先看回答里的反应模式，再给出更具体的一张人格截图。</p>
         </aside>
       </section>
 
       <section class="mechanics-panel">
         <div class="section-heading">
           <p class="eyebrow">How It Works</p>
-          <h2>不是直接把结果硬贴到题目上</h2>
-          <p class="section-copy">流程上分三步走，题库、六维计分和 64 型映射是拆开的，所以后面调文案和调体验不会互相打架。</p>
+          <h2>不是先想好结果，再把题目贴上去</h2>
+          <p class="section-copy">它会先整理回答里的共性，再去判断你最接近哪一型，所以题目、维度和结果是分开工作的。</p>
         </div>
 
         <div class="about-step-grid">
@@ -584,7 +690,7 @@ function renderAboutScreen() {
       <section class="mechanics-panel">
         <div class="section-heading">
           <p class="eyebrow">Hidden Axes</p>
-          <h2>后台实际在看的 6 条隐藏轴</h2>
+          <h2>这套测试主要会看 6 个方向</h2>
           <p class="section-copy">每条轴都是 8 题，按正反向计分后，再决定这一轴到底偏哪边。</p>
         </div>
 
@@ -629,7 +735,7 @@ function renderAboutScreen() {
           <article class="copy-card copy-card-wide">
             <p class="mini-label">Formula</p>
             <pre class="formula-block">index = A × 32 + B × 16 + C × 8 + D × 4 + E × 2 + F</pre>
-            <p class="copy-body">索引范围刚好是 0 到 63，对应 64 种结果。也就是说，用户看到的是梗图人格宇宙，后台其实是一个可维护的六维模型。</p>
+            <p class="copy-body">索引范围刚好是 0 到 63，对应 64 种结果。你最后看到的那一型，就是从这 64 个结果里综合选出来的落点。</p>
           </article>
         </div>
       </section>
@@ -701,7 +807,6 @@ function renderAxisSection(section) {
 function renderQuizScreen() {
   const answeredCount = getAnsweredCount(state.answers)
   const progress = Math.round((answeredCount / totalQuestions) * 100)
-  const updateSummary = appMeta.latestUpdatePoints.join(' ')
 
   return `
     <main class="layout quiz-layout">
@@ -709,7 +814,7 @@ function renderQuizScreen() {
         <article class="quiz-intro-card">
           <div class="progress-header">
             <div class="quiz-intro-copy">
-              <p class="eyebrow">答题提示</p>
+              <p class="eyebrow">Atlas Quiz</p>
               <h1 class="question-title">按直觉作答，整页一次填完。</h1>
               <p class="section-copy">不用先想标准答案，做完就能直接算结果。</p>
             </div>
@@ -731,16 +836,16 @@ function renderQuizScreen() {
         </div>
 
         <article class="quiz-update-note">
-          <p class="mini-label">Latest Update · v${escapeHtml(appMeta.version)}</p>
-          <p class="quiz-update-copy">${escapeHtml(appMeta.latestUpdateTitle)}。${escapeHtml(updateSummary)}</p>
+          <p class="mini-label">小提示</p>
+          <p class="quiz-update-copy">测完以后你可以把结果加入 Atlas 热度榜，也可以直接继续逛 64 型的人格结果。</p>
         </article>
       </section>
 
       <aside class="quiz-sidebar">
         <article class="palette-card quiz-summary-card">
-          <p class="mini-label">${escapeHtml(appMeta.stage)} / v${escapeHtml(appMeta.version)}</p>
+          <p class="mini-label">Atlas Quiz</p>
           <h2 class="sidebar-title">进度一眼看完</h2>
-          <p class="section-copy">桌面端右侧固定，手机端会折回顶部，不再挡住内容。</p>
+          <p class="section-copy">边答边看进度，补题时也能直接跳到还没做完的那一段。</p>
 
           <div class="sidebar-progress">
             <strong>${progress}%</strong>
@@ -782,12 +887,13 @@ function renderResultScreen() {
   const relatedResults = getRelatedResults(index)
   const confidence = getResultConfidence(axisBreakdown)
   const strongAxes = getStrongAxisCount(axisBreakdown)
+  const heatCount = getHeatCountForCode(result.code)
 
   return `
     <main class="layout result-layout">
       <section class="result-hero">
         <div class="result-copy">
-          <p class="eyebrow">${escapeHtml(appMeta.stage)} Result</p>
+          <p class="eyebrow">Atlas Result</p>
           <div class="result-badge-row">
             <span class="code-badge">${escapeHtml(result.code)}</span>
             <span class="status-pill">#${String(index).padStart(2, '0')} / 63</span>
@@ -807,12 +913,13 @@ function renderResultScreen() {
               <span>隐藏索引</span>
             </article>
             <article class="stat-card">
-              <strong>v${escapeHtml(appMeta.version)}</strong>
-              <span>当前 beta 版本</span>
+              <strong>${heatCount ?? '—'}</strong>
+              <span>已加入热度榜</span>
             </article>
           </div>
 
           <div class="action-row">
+            <button class="secondary-btn" id="submit-heat" type="button">提交到 Atlas 热度榜</button>
             <button class="primary-btn" id="copy-result" type="button">
               ${
                 state.copyState === 'done'
@@ -825,6 +932,10 @@ function renderResultScreen() {
             <button class="secondary-btn" id="restart-quiz" type="button">重新测一次</button>
             <button class="secondary-btn" data-nav-view="home" type="button">回到首页</button>
           </div>
+
+          <p class="result-heat-note">
+            会打开一个公开提交页，确认提交后，这一型就会计入 Atlas 热度榜。${heatCount !== null ? `这一型目前累计 ${heatCount} 次公开提交。` : ''}
+          </p>
         </div>
 
         <aside class="preview-panel preview-panel-reference">
@@ -841,8 +952,8 @@ function renderResultScreen() {
 
       <section class="result-content-panel">
         <div class="section-heading">
-          <p class="eyebrow">Result Copy</p>
-          <h2>结果文案还是五段式，但现在也能顺着站点继续逛其他页面</h2>
+          <p class="eyebrow">Your Type</p>
+          <h2>这一型的人格描述</h2>
           <p class="section-copy">上面先看人物海报和主类型摘要，下面继续看完整的朋友式点评。</p>
         </div>
 
@@ -960,7 +1071,7 @@ function renderTopbar() {
           <span class="brand-dot brand-dot-c"></span>
         </span>
         <span class="brand-stack">
-          <span class="brand-wordmark">SBTI</span>
+          <span class="brand-wordmark">Atlas</span>
           <span class="brand-subtitle">人格测试</span>
         </span>
       </button>
@@ -982,7 +1093,7 @@ function renderTopbar() {
       </nav>
 
       <div class="topbar-side">
-        <span class="status-pill">${escapeHtml(appMeta.stage)} · v${escapeHtml(appMeta.version)}</span>
+        <span class="status-pill">64 型结果 · 实时热度榜</span>
       </div>
     </header>
   `
@@ -991,8 +1102,8 @@ function renderTopbar() {
 function renderFooter() {
   return `
     <footer class="site-footer">
-      <span>${escapeHtml(appMeta.stage)} · v${escapeHtml(appMeta.version)}</span>
-      <span>SBTI · 静态网页版 64 型人格测试</span>
+      <span>Atlas · v${escapeHtml(appMeta.version)}</span>
+      <span>Atlas · 64 型人格测试</span>
       <a href="${escapeHtml(appMeta.repoUrl)}" target="_blank" rel="noreferrer">GitHub</a>
     </footer>
   `
@@ -1001,26 +1112,26 @@ function renderFooter() {
 function getDocumentTitle() {
   if (state.view === 'result' && isQuizComplete(state.answers)) {
     const { result } = getFinalResult(state.answers)
-    return `${result.name} | SBTI 人格测试`
+    return `${result.name} | Atlas 人格测试`
   }
 
   if (state.view === 'types') {
-    return `人格类型 | SBTI 人格测试`
+    return `人格类型 | Atlas 人格测试`
   }
 
   if (state.view === 'rankings') {
-    return `人格排行榜 | SBTI 人格测试`
+    return `人格排行榜 | Atlas 人格测试`
   }
 
   if (state.view === 'about') {
-    return `关于测试 | SBTI 人格测试`
+    return `关于测试 | Atlas 人格测试`
   }
 
   if (state.view === 'quiz') {
-    return `开始测试 | SBTI 人格测试`
+    return `开始测试 | Atlas 人格测试`
   }
 
-  return `SBTI 人格测试 | ${appMeta.stage} v${appMeta.version}`
+  return `Atlas 人格测试 | 64 型结果测试`
 }
 
 function renderView() {
@@ -1073,6 +1184,13 @@ function render() {
 
   document.querySelectorAll('[data-random-preview]').forEach((button) => {
     button.addEventListener('click', pickRandomPreview)
+  })
+
+  document.querySelector('#submit-heat')?.addEventListener('click', openHeatSubmission)
+  document.querySelectorAll('[data-refresh-ranking]').forEach((button) => {
+    button.addEventListener('click', () => {
+      void ensureRankingData(true)
+    })
   })
 
   document.querySelector('#restart-quiz')?.addEventListener('click', restartQuiz)
