@@ -44,6 +44,8 @@ const state = {
   view: 'home',
   answers: Array(totalQuestions).fill(null),
   previewCode: 'LOOP',
+  typeQuery: '',
+  preserveTypeSearchFocus: false,
   copyState: 'idle',
   preservedQuizScrollY: null,
   rankingStatus: 'idle',
@@ -123,7 +125,7 @@ function getRelatedResults(index) {
 }
 
 function getShareText(result) {
-  return `我测出来是 ${result.code}｜${result.englishName}｜${result.name}\n一句话：${result.verdict}\n朋友式吐槽：${result.friendRoast}\n给我的提醒：${result.reminder}\n#MoodAtlas`
+  return `我测出来是 ${result.code}｜${result.englishName}｜${result.name}\n一句话：${result.verdict}\n朋友式吐槽：${result.friendRoast}\n给我的提醒：${result.reminder}\n#Atlas人格测试`
 }
 
 function getAxisAnsweredCount(axis) {
@@ -146,6 +148,40 @@ function scrollToSelector(selector) {
 
 function getHeatCountForCode(code) {
   return state.rankingEntries.find((entry) => entry.code === code)?.count ?? null
+}
+
+function normalizeSearchText(value) {
+  return String(value).trim().toLowerCase()
+}
+
+function getTypeSearchResults() {
+  const query = normalizeSearchText(state.typeQuery)
+
+  if (!query) {
+    return indexedResults
+  }
+
+  return indexedResults.filter((result) => {
+    const haystack = [result.code, result.englishName, result.name, result.verdict, result.friendRoast].join(' ').toLowerCase()
+
+    return haystack.includes(query)
+  })
+}
+
+function getRankingSummaryNote(rankingEntries) {
+  if (state.rankingStatus === 'loading') {
+    return `正在读取公开提交记录，当前先展示 ${rankingEntries.length} 种人格类型。`
+  }
+
+  if (state.rankingStatus === 'error') {
+    return '热度数据暂时没有加载成功，稍后刷新一下就好。'
+  }
+
+  if (!Number.isFinite(state.rankingUpdatedAt)) {
+    return `当前已展示 ${rankingEntries.length} 种人格类型，等待首次刷新。`
+  }
+
+  return `当前已统计 ${rankingEntries.length} 种人格类型，${formatTimeAgo(state.rankingUpdatedAt)}。`
 }
 
 function seedRankingEntries() {
@@ -210,6 +246,18 @@ function openHeatSubmission() {
   window.open(submissionUrl, '_blank', 'noopener,noreferrer')
 }
 
+function updateTypeQuery(value) {
+  state.typeQuery = value
+  state.preserveTypeSearchFocus = true
+  render()
+}
+
+function clearTypeQuery() {
+  state.typeQuery = ''
+  state.preserveTypeSearchFocus = true
+  render()
+}
+
 function goToView(view, options = {}) {
   const { scroll = true, code = null } = options
 
@@ -266,10 +314,6 @@ async function copyResultText() {
 
   resetCopyStateSoon()
   render()
-}
-
-function startQuiz() {
-  goToView('quiz')
 }
 
 function restartQuiz() {
@@ -485,6 +529,8 @@ function renderTypeCard(result) {
 function renderTypesScreen() {
   const selected = getPreviewResult()
   const selectedHeatCount = getHeatCountForCode(selected.code)
+  const typeResults = getTypeSearchResults()
+  const hasTypeQuery = Boolean(state.typeQuery.trim())
 
   return `
     <main class="layout">
@@ -524,13 +570,36 @@ function renderTypesScreen() {
           <div class="section-heading">
             <p class="eyebrow">Type Library</p>
             <h2>把 64 型一次摊开看</h2>
-            <p class="section-copy">点任意一型，就会把上面的主卡切到对应人物和文案。</p>
+            <p class="section-copy">可以直接搜代号、中文名、英文名或关键词；点任意一型，就会把上面的主卡切到对应人物和文案。</p>
           </div>
-          <p class="library-count">共 ${indexedResults.length} 型，当前浏览 ${escapeHtml(selected.name)}。</p>
+          <label class="search-box type-search-box">
+            <span>快速搜索</span>
+            <input
+              id="type-search"
+              type="search"
+              value="${escapeHtml(state.typeQuery)}"
+              placeholder="搜 LOOP、复盘、Masked One..."
+              autocomplete="off"
+            />
+          </label>
+          <p class="library-count">
+            ${hasTypeQuery ? `找到 ${typeResults.length} 型` : `共 ${indexedResults.length} 型`}，当前浏览 ${escapeHtml(selected.name)}。
+            ${hasTypeQuery ? '<button class="text-link-button" id="clear-type-search" type="button">清空搜索</button>' : ''}
+          </p>
         </div>
 
         <div class="results-grid type-results-grid">
-          ${indexedResults.map((result) => renderTypeCard(result)).join('')}
+          ${
+            typeResults.length
+              ? typeResults.map((result) => renderTypeCard(result)).join('')
+              : `
+                <article class="empty-state">
+                  <p class="mini-label">No Match</p>
+                  <h3>暂时没搜到这一型</h3>
+                  <p class="section-copy">换个关键词试试，比如代号、中文名、英文名，或者直接搜“复盘”“低电量”“上头”。</p>
+                </article>
+              `
+          }
         </div>
       </section>
     </main>
@@ -572,13 +641,7 @@ function renderRankingsScreen() {
         <aside class="palette-card about-callout">
           <p class="mini-label">公开热度概览</p>
           <h3>${state.rankingStatus === 'loading' ? '正在刷新最新榜单' : `${state.rankingTotal} 次公开提交`}</h3>
-          <p class="summary-note">
-            ${
-              state.rankingStatus === 'error'
-                ? '热度数据暂时没有加载成功，稍后刷新一下就好。'
-                : `当前已统计 ${rankingEntries.length} 种人格类型，${formatTimeAgo(state.rankingUpdatedAt)}。`
-            }
-          </p>
+          <p class="summary-note">${getRankingSummaryNote(rankingEntries)}</p>
         </aside>
       </section>
 
@@ -640,7 +703,7 @@ function renderAboutScreen() {
             </article>
             <article class="stat-card">
               <strong>6</strong>
-              <span>隐藏轴先算出来</span>
+              <span>先看 6 个方向</span>
             </article>
             <article class="stat-card">
               <strong>64</strong>
@@ -729,7 +792,7 @@ function renderAboutScreen() {
           <article class="copy-card">
             <p class="mini-label">Binary Index</p>
             <h3>按 A / B / C / D / E / F 拼成六位</h3>
-            <p class="copy-body">得到的不是人格名本身，而是一串隐藏索引。前台不展示这六位，但它会稳定地决定最终结果。</p>
+            <p class="copy-body">得到的不是人格名本身，而是一串结果编号。平时不用关心这串编号，它只是用来让同样的回答稳定落到同一型。</p>
           </article>
 
           <article class="copy-card copy-card-wide">
@@ -878,6 +941,12 @@ function renderQuizScreen() {
           </div>
         </article>
       </aside>
+
+      <aside class="quiz-mobile-dock" aria-label="答题快捷操作">
+        <span>${answeredCount}/${totalQuestions} 已答</span>
+        <button class="dock-secondary-btn" id="dock-jump-unanswered" type="button">漏答题</button>
+        <button class="dock-primary-btn" id="dock-submit-quiz" type="button" ${!isQuizComplete(state.answers) ? 'disabled' : ''}>查看结果</button>
+      </aside>
     </main>
   `
 }
@@ -910,7 +979,7 @@ function renderResultScreen() {
             </article>
             <article class="stat-card">
               <strong>${binaryIndex}</strong>
-              <span>隐藏索引</span>
+              <span>结果编号</span>
             </article>
             <article class="stat-card">
               <strong>${heatCount ?? '—'}</strong>
@@ -945,7 +1014,7 @@ function renderResultScreen() {
             kicker: '你的主类型',
             pill: `匹配感 ${confidence}% · ${strongAxes}/6 轴更明确`,
             body: result.why,
-            note: `维度命中度比较稳定，这一型可以先看作你当前最像的一张人格截图。隐藏索引是 ${binaryIndex}（#${index}）。`,
+            note: `维度命中度比较稳定，这一型可以先看作你当前最像的一张人格截图。结果编号是 ${binaryIndex}（#${index}）。`,
           })}
         </aside>
       </section>
@@ -992,7 +1061,7 @@ function renderResultScreen() {
       </section>
 
       <details class="details-panel">
-        <summary>查看幕后算分</summary>
+        <summary>查看结果怎么算出来</summary>
         <div class="details-content">
           <p class="section-copy">
             你的最终结果来自 6 个隐藏维度组成的二进制索引 <strong>${binaryIndex}</strong>，十进制是 <strong>${index}</strong>。
@@ -1084,6 +1153,7 @@ function renderTopbar() {
                 class="topnav-button${activeView === item.view ? ' is-active' : ''}"
                 type="button"
                 data-nav-view="${item.view}"
+                ${activeView === item.view ? 'aria-current="page"' : ''}
               >
                 ${escapeHtml(item.label)}
               </button>
@@ -1187,6 +1257,10 @@ function render() {
   })
 
   document.querySelector('#submit-heat')?.addEventListener('click', openHeatSubmission)
+  document.querySelector('#type-search')?.addEventListener('input', (event) => {
+    updateTypeQuery(event.target.value)
+  })
+  document.querySelector('#clear-type-search')?.addEventListener('click', clearTypeQuery)
   document.querySelectorAll('[data-refresh-ranking]').forEach((button) => {
     button.addEventListener('click', () => {
       void ensureRankingData(true)
@@ -1196,7 +1270,9 @@ function render() {
   document.querySelector('#restart-quiz')?.addEventListener('click', restartQuiz)
   document.querySelector('#copy-result')?.addEventListener('click', copyResultText)
   document.querySelector('#submit-quiz')?.addEventListener('click', showResult)
+  document.querySelector('#dock-submit-quiz')?.addEventListener('click', showResult)
   document.querySelector('#jump-unanswered')?.addEventListener('click', jumpToFirstUnanswered)
+  document.querySelector('#dock-jump-unanswered')?.addEventListener('click', jumpToFirstUnanswered)
 
   document.querySelectorAll('[data-open-type]').forEach((button) => {
     button.addEventListener('click', () => {
@@ -1223,6 +1299,18 @@ function render() {
     state.preservedQuizScrollY = null
     requestAnimationFrame(() => {
       window.scrollTo({ top: preservedScrollY })
+    })
+  }
+
+  if (state.view === 'types' && state.preserveTypeSearchFocus) {
+    state.preserveTypeSearchFocus = false
+    requestAnimationFrame(() => {
+      const searchInput = document.querySelector('#type-search')
+
+      if (searchInput) {
+        searchInput.focus()
+        searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length)
+      }
     })
   }
 }

@@ -313,6 +313,16 @@ button {
   flex-wrap: wrap;
 }
 
+.text-link-button {
+  padding: 0;
+  margin-left: 8px;
+  background: transparent;
+  color: var(--accent-deep);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .status-pill,
 .ghost-link,
 .primary-btn,
@@ -1055,6 +1065,10 @@ h1 {
   max-width: 540px;
 }
 
+.type-search-box {
+  flex-basis: 320px;
+}
+
 .search-box input {
   width: 100%;
   padding: 0.95rem 1rem;
@@ -1310,6 +1324,35 @@ h1 {
   display: grid;
   gap: 16px;
   align-content: start;
+}
+
+.quiz-mobile-dock {
+  display: none;
+}
+
+.dock-primary-btn,
+.dock-secondary-btn {
+  min-height: 42px;
+  padding: 0.62rem 0.86rem;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dock-primary-btn {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+  color: #fff8f3;
+}
+
+.dock-secondary-btn {
+  border: 1px solid rgba(31, 24, 19, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--ink);
+}
+
+.dock-primary-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .palette-card {
@@ -1575,43 +1618,54 @@ h1 {
 @media (max-width: 760px) {
   .page-shell {
     width: min(100%, calc(100% - 20px));
-    padding-top: 12px;
+    padding-top: 10px;
   }
 
   .topbar {
     position: static;
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 12px;
     align-items: stretch;
-    padding: 18px;
-  }
-
-  .brand-lockup {
-    gap: 14px;
+    padding: 14px;
+    border-radius: 24px;
   }
 
   .brand-mark {
-    width: 64px;
-    height: 64px;
+    width: 48px;
+    height: 48px;
   }
 
   .brand-wordmark {
-    font-size: 1.9rem;
+    font-size: 1.55rem;
+  }
+
+  .brand-subtitle {
+    font-size: 0.78rem;
   }
 
   .topnav {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
     gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
   }
 
-  .topnav-button,
-  .status-pill {
-    width: 100%;
+  .topnav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .topnav-button {
+    flex: 0 0 auto;
+    min-height: 42px;
+    padding: 0.58rem 0.82rem;
+    font-size: 0.92rem;
   }
 
   .topbar-side {
-    width: 100%;
+    display: none;
   }
 
   .hero-panel,
@@ -1646,6 +1700,35 @@ h1 {
   .action-row,
   .sidebar-actions {
     flex-direction: column;
+  }
+
+  .quiz-layout {
+    padding-bottom: 78px;
+  }
+
+  .quiz-mobile-dock {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    z-index: 30;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid rgba(31, 24, 19, 0.1);
+    border-radius: 999px;
+    background: rgba(255, 252, 247, 0.94);
+    box-shadow: 0 14px 34px rgba(65, 38, 16, 0.16);
+    backdrop-filter: blur(18px);
+  }
+
+  .quiz-mobile-dock span {
+    min-width: 0;
+    color: var(--ink-soft);
+    font-size: 0.86rem;
+    white-space: nowrap;
   }
 
   .primary-btn,

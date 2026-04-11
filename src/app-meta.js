@@ -1,15 +1,22 @@
 export const appMeta = {
   stage: 'Beta',
-  version: '0.1.0-beta.15',
+  version: '0.1.0-beta.16',
   repoUrl: 'https://github.com/Lengzhe1984/mood-atlas',
   siteUrl: 'https://lengzhe1984.github.io/mood-atlas/',
-  latestUpdateTitle: 'Atlas 热度榜上线，全站文案切成公开版',
+  latestUpdateTitle: '全站体验巡检，移动端和类型浏览更顺手',
   latestUpdatePoints: [
-    '品牌名统一为 Atlas，不再使用旧站名。',
-    '人格排行榜改成用户主动公开提交后的实时热度榜。',
-    '首页、榜单页、关于页和结果页文案都清理成对外可见版本。',
+    '移动端顶栏压缩成更轻的横向导航，减少首屏占用。',
+    '人格类型页加入搜索，可以按代号、中文名、英文名和关键词快速找类型。',
+    '答题页手机端增加底部快捷条，漏答题和查看结果不用一路滑到底。',
   ],
   recentUpdates: [
+    {
+      version: '0.1.0-beta.16',
+      notes: [
+        '移动端顶栏更短，答题页加入底部快捷操作。',
+        '人格类型页支持搜索，结果页和说明页文案继续对外化。',
+      ],
+    },
     {
       version: '0.1.0-beta.15',
       notes: [
@@ -22,13 +29,6 @@ export const appMeta = {
       notes: [
         '新增人格类型、人格排行榜和关于测试三页。',
         '顶部导航和品牌区升级，浏览更清楚。',
-      ],
-    },
-    {
-      version: '0.1.0-beta.13',
-      notes: [
-        '64 型像素方块人物整体重做。',
-        '每一型都有更明确的人物差异。',
       ],
     },
   ],
